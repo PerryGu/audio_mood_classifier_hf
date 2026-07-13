@@ -1,0 +1,499 @@
+# catalog_with_paths
+
+| Field | Value |
+|---|---|
+| Generated | 2026-06-02 14:50:15 |
+| Library | `\\GAMES\Utils\iTunes\iTunes Media\Music` |
+| Catalog | `songs_catalog.md` |
+| Match threshold | 0.72 |
+
+---
+
+## calm_melancholic (84 tracks)
+- **10cc - I’m Not in Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\10cc\The Original Soundtrack\02 I_m Not in Love.m4a` — [06:08]
+- **Air - How Does It Make You Feel?**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\10 000 Hz Legend\02 How Does It Make You Feel_.m4a` — [04:37]
+- **Air - All I Need**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Moon Safari\03 All I Need.m4a` — [04:28]
+- **Air - You Make It Easy**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Moon Safari\07 You Make It Easy.m4a` — [04:01]
+- **Air - Talisman**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Moon Safari\05 Talisman.m4a` — [04:16]
+- **Air - New Star in the Sky**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Moon Safari\09 New Star in the Sky.m4a`
+- **Air - Cherry Blossom Girl**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Talkie Walkie\02 Cherry Blossom Girl.m4a` — [03:39]
+- **Air - Playground Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Air\Moon Safari\09 New Star in the Sky.m4a`
+- **Al Green - How Can You Mend a Broken Heart**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Al Green\The Immortal Soul of Al Green\1-24 How Can You Mend a Broken Heart.m4a` — [06:24]
+- **Dave Berry - The Crying Game**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Anne Dudley\The Crying Game_ Original Motion Picture\07 The Crying Game.m4a` — [02:43]
+- **The Alan Parsons Project - Old and Wise**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Alan Parsons Project\Star Mark Greatest Hits CD2\05 Old and Wise.m4a` — [04:54]
+- **The Needle and the Damage Done**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Neil Young\Greatest Hits\09 The Needle and the Damage Done.m4a` — [02:13]
+- **Tori Amos - I Don't Like Mondays**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tori Amos\Strange Little Girls\09 I Don't Like Mondays.m4a` — [04:20]
+- **Michael Andrews, Gary Jules - Mad World**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Michael Andrews feat. Gary Jules\Mad World\01 Mad World.m4a` — [03:02]
+- **Shlomo Artzi - אף פעם לא תדעי**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלמה ארצי\דרכים\01 אף פעם לא תדעי.m4a` — [05:33]
+- **Shlomo Artzi - שדות של אירוסים**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלמה ארצי\האוסף המשולש\2-10 שדות של אירוסים.m4a` — [05:21]
+- **Angelo Badalamenti - Twin Peaks, television score: Twin Peaks Theme**
+  -  `\\GAMES\Utils\iTunes\iTunes Media\Music\Angelo Badalamenti\Twin Peaks\01 Twin Peaks Theme.m4a`
+- **Shirley Bassey - Moonraker [Main Title]**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Various Artists\Best of Bond… James Bond_ 50 Years — 50\1-12 Moonraker.m4a`
+- **Jon Brion, Beck - Eternal Sunshine of the Spotless Mind**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Jon Brion\Eternal Sunshine of the Spotless Mind\09 Everybody's Gotta Learn Sometime.m4a`
+- **Beck - Morning**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Beck\Morning Phase\02 Morning.m4a` — [05:19]
+- **Beck - The Golden Age**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Beck\Sea Change\01 The Golden Age.m4a` — [04:37]
+- **Beck - Guess I’m Doing Fine**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Beck\Sea Change\03 Guess I_m Doing Fine.m4a` — [04:48]
+- **Beck - Lonesome Tears**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Beck\Sea Change\1-04 Lonesome Tears.m4a` — [05:40]
+- **Belly - Sweet Ride**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Belly\Sweet Ride_ The Best of Belly\18 Sweet Ride.m4a` — [03:17]
+- **Black - Wonderful Life**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Black\Wonderful Life\01 Wonderful Life.m4a` — [04:43]
+- **James Blake - The Wilhelm Scream**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\James Blake\James Blake\02 The Wilhelm Scream.m4a` — [04:37]
+- **Blur - To the End**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Blur\Parklife\1-09 To the End.m4a` — [04:04]
+- **Blur - Out of Time**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Blur\Think Tank\02 Out of Time.m4a` — [03:36]
+- **Bread - If**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bread\The Best of Bread\06 If.m4a` — [02:40]
+- **The Cars - I'm Not the One**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Cars\Shake It Up\03 I_m Not the One.m4a` — [04:15]
+- **Chicago - Wishing You Were Here**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Chicago\Ultimate Collection\2-11 Wishing You Were Here.m4a` — [04:36]
+- **Coldcut - Autumn Leaves**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Coldcut\Philosophy\10 Autumn Leaves.m4a` — [05:51]
+- **The Cure - Lullaby**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Cure\Disintegration\06 Lullaby.m4a` — [04:09]
+- **Deep Purple - Lalena**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Deep Purple\Deep Purple\03 Lalena.m4a` — [05:08]
+- **Dire Straits - Private Investigations**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Dire Straits\Sultans of Swing_ The Very Best of Dire\05 Private Investigations.m4a` — [05:59]
+- **Dire Straits - Brothers in Arms**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Dire Straits\Money For Nothing\12 Brothers In Arms.m4a` — [04:49]
+- **Thomas Dolby - I Scare Myself**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Thomas Dolby\The Flat Earth\06 I Scare Myself.m4a` — [05:40]
+- **Eagles - I Wish You Peace**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Eagles\One of These Nights\09 I Wish You Peace.m4a` — [03:45]
+- **Emika - Wicked Game**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Emika\Dva\10 Wicked Game.m4a` — [03:56]
+- **Genesis - Many Too Many**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Genesis\Platinum Collection\2-07 Many Too Many.m4a` — [03:34]
+- **Shalom Hanoch - דז'ה וו.**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלום חנוך\לא יכול לישון עכשיו\04 דז'ה וו..m4a` — [05:22]
+- **Shalom Hanoch - עיר זרה**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלום חנוך\לא יכול לישון עכשיו\09 עיר זרה.m4a` — [05:33]
+- **Shalom Hanoch - קרן שמש מאוחרת**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלום חנוך\לא יכול לישון עכשיו\15 קרן שמש מאוחרת.m4a` — [05:41]
+- **George Harrison - Beware of Darkness**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Harrison\All Things Must Pass\2-01 Beware of Darkness.m4a` — [03:49]
+- **Kristin Hersh - Your Ghost**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\The Rocking Ladies\10 Your Ghost.m4a` — [03:14]
+- **Michael Jackson - Stranger in Moscow**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Michael Jackson\HIStory Continues\1-03 Stranger in Moscow.m4a` — [05:44]
+- **King Crimson - I Talk to the Wind**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\King Crimson\In the Court of the Crimson King\02 I Talk to the Wind.m4a` — [06:05]
+- **The Korgis - Everybody's Got to Learn Sometime**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Everybody_s Got to Learn Sometime\2-01 Everybody_s Got to Learn Someti.m4a` — [04:12]
+- **Massive Attack, Madonna - I Want You**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Massive Mixes_ Collaborations & Remixes\01 I Want You.m4a` — [06:21]
+- **k.d. lang - The Air That I Breathe**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\k.d. lang\Recollection\1-03 The Air That I Breathe.m4a` — [06:14]
+- **Massive Attack - Unfinished Sympathy**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Collected\08 Unfinished Sympathy.m4a` — [05:12]
+- **Massive Attack - Angel**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Singles 90_98\10-01 Angel (album version).m4a` — [06:20]
+- **Massive Attack - Teardrop**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Collected\04 Teardrop.m4a` — [05:28]
+- **Massive Attack - Protection**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Protection\01 Protection.m4a` — [07:51]  
+- **Massive Attack - What Your Soul Sings**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Collected\10 What Your Soul Sings.m4a` — [06:37]
+- **Massive Attack - Sly**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Protection\08 Sly.m4a` — [05:24]
+- **Massive Attack - Live With Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Collected\14 Live With Me.m4a` — [04:51]
+- **Massive Attack - Black Milk**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Mezzanine\08 Black Milk.m4a` — [06:21]
+- **Massive Attack - Exchange**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Massive Attack\Mezzanine\11 (Exchange).m4a` — [04:12]
+- **Mazzy Star - Cry, Cry**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Mazzy Star\Among My Swan\04 Cry, Cry.m4a` — [03:49]
+- **Mazzy Star - Take Everything**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Mazzy Star\Among My Swan\05 Take Everything.m4a` — [04:55]
+- **Mazzy Star - Fade into You**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Mazzy Star\So Tonight That I Might See\01 Fade Into You.m4a` — [04:51]
+- **Mazzy Star - Into Dust**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Mazzy Star\So Tonight That I Might See\09 Into Dust.m4a` — [05:31]
+- **Pat Metheny Group, Pat Metheny - Chris**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Pat Metheny Group\The Falcon and the Snowman\03 Chris 1.m4a` — [03:21]
+- **Pat Metheny Group, Pat Metheny - The Falcon**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Pat Metheny Group\The Falcon and the Snowman\04 _The Falcon_.m4a` — [05:02]
+- **Pat Metheny Group, Pat Metheny - Capture**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Pat Metheny Group\The Falcon and the Snowman\08 Capture.m4a` — [04:03]
+- **George Michael - They Won't Go When I Go**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Listen Without Prejudice Vol. 1\03 They Won't Go When I Go.m4a` — [05:06]
+- **Minimal Compact - When I Go**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Minimal compact\Unknown Album\When I Go.m4a` — [03:14]
+- **The Moody Blues - Melancholy Man**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Moody Blues\Greatest Hits & More\2-01 Melancholy Man.m4a` — [05:45]
+- **Morrissey - Interlude**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Morrissey\Very Best Of Morrissey\17 Interlude (solo version).m4a` — [03:39]
+- **Peter Murphy - A Strange Kind of Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Peter Murphy\Wild Birds 1985-1995\08 Strange Kind of Love.m4a` — [03:47]
+- **Sinéad O’Connor - You Made Me the Thief of Your Heart**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Sinéad O_Connor\So Far… The Best of Sinéad O'Connor\14 You Made Me the Thief of Your Hea.m4a` — [06:21]
+- **Sinéad O’Connor - Thank You for Hearing Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Sinéad O_Connor\Universal Mother\14 Thank You for Hearing Me.m4a` — [06:25]
+- **Pet Shop Boys - Being Boring**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Pet Shop Boys\Discography_ The Complete Singles Collec\14 Being Boring.m4a` — [04:51]
+  - **Archive - I Will Fade**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Archive\Lights\07 I Will Fade.m4a` — [03:08]
+- **Leonard Cohen - Suzanne**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Leonard Cohen\Greatest Hits\2-16 Suzanne.m4a` — [03:48]
+- **Bruce Springsteen - I'm on Fire**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bruce Springsteen\Born in the U.S.A_\06 I_m on Fire.m4a` — [02:41]
+- **Suzanne Vega - In Liverpool**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Suzanne Vega\The Best Of Suzanne Vega_ Tried And True\04 Caramel.m4a` — [02:54]
+- **Tuxedomoon - In a Manner of Speaking**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tuxedomoon\The Best of Tuxedomoon_ Solve Et Coagula\06 In a Manner of Speaking.m4a` — [03:28]
+- **Tuxedomoon - The Cage**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tuxedomoon\Tuxedomoon\15 The Cage.m4a` — [04:12]
+  
+## moderate_neutral (74 tracks)
+- **10cc - Dreadlock Holiday**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\10cc\Bloody Tourists\01 Dreadlock Holiday.m4a` — [04:31]
+- **a‐ha - I Call Your Name**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\a‐ha\East of the Sun, West of the Moon\03 I Call Your Name.m4a` — [04:53]
+- **America - A Horse With No Name**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\America\The Complete Greatest Hits\01 A Horse With No Name.m4a` — [04:11]
+- **America - Ventura Highway**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\America\The Complete Greatest Hits\05 Ventura Highway.m4a` — [03:33]
+- **America - Tin Man**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\America\The Complete Greatest Hits\10 Tin Man.m4a` — [03:27]
+- **America - Lonely People**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\America\The Complete Greatest Hits\11 Lonely People.m4a` — [02:28]
+- **America - You Can Do Magic**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\America\The Complete Greatest Hits\18 You Can Do Magic.m4a` — [03:52]
+- **Shlomo Artzi - מהן המלים**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\שלמה ארצי\האוסף המשולש\3-07 מהן המלים.m4a` — [03:20]
+- **The Beatles - Your Mother Should Know**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Beatles\Magical Mystery Tour\05 Your Mother Should Know.m4a` — [02:28]
+- **The Beautiful South - Everybody's Talkin'**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Beautiful South\Solid Bronze • Great Hits\06 Everybody_s Talkin_.m4a` — [02:38]
+- **Beck -Deadweight**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Beck\Odelay\1-15 Deadweight.m4a` — [06:12]
+- **Bee Gees - Nights on Broadway**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bee Gees\The Ultimate Bee Gees\1-04 Nights on Broadway.m4a` — [04:33]
+- **Bee Gees - Spirits*
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bee Gees\The Ultimate Bee Gees\1-09 Spirits (Having Flown).m4a` — [05:11]
+- **George Benson - Give Me the Night**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Benson\The Greatest Hits of All\07 Give Me the Night.m4a` — [03:42]
+- **Andrew Bird - Oh No**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Andrew Bird\Noble Beast\01 Oh No.m4a` — [04:20]
+- **Goran Bregović, Iggy Pop, Boban Marković Orkestar - In the Deathcar**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Goran Bregović\Arizona Dream\01 In the Deathcar 1.m4a` — [05:13]
+- **J.J. Cale - After Midnight**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\J.J. Cale\Universal Masters Collection\01 After Midnight.m4a` — [02:23]
+- **The Cars - My Best Friend's Girl**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Cars\The Cars\02 My Best Friend's Girl.m4a` — [03:44]
+- **Eric Clapton - Lay Down Sally**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Eric Clapton\Backtrackin'\1-03 Lay Down Sally.m4a` — [03:51]
+- **Coldplay - Magic**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Coldplay\Ghost Stories\02 Magic.m4a` — [04:45]
+- **Elvis Costello - The Other Side of Summer**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Elvis Costello\Mighty Like a Rose\01 The Other Side of Summer.m4a` — [03:56]
+- **The Cowsills - The Rain, The Park & Other Things**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Cowsills\The Best of The Cowsills\01 The Rain, The Park, and Other Thi.m4a`
+- **The Cure - Close to Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Cure\Greatest Hits\07 Close to Me.m4a` — [03:44]
+- **Donovan - Mellow Yellow**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Donovan\Donovan's Greatest Hits\07 Mellow Yellow.m4a` — [03:39]
+- **Duran Duran - Notorious**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Duran Duran\Notorious\01 Notorious.m4a` — [04:18]
+- **EELS - Fresh Feeling**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\eels\Souljacker\03 Fresh Feeling.m4a` — [03:37]
+- **Faith No More - Evidence**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Faith No More\King for a Day… Fool for a Lifetime\03 Evidence.m4a` — [04:53]
+- **Flash and the Pan - Waiting For A Train**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Flash and the Pan\Headlines\03 Waiting for a Train.m4a` — [04:43]
+- **Steve Forbert - Romeo's Tune**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Steve Forbert\The Best of Steve Forbert_ What Kinda Gu\02 Romeo's Tune.m4a` — [03:32]
+- **Fun Boy Three - The Tunnel of Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Fun Boy Three\Waiting\06 Tunnel of Love.m4a` — [03:08]
+- **Fun Boy Three - Our Lips Are Sealed**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Fun Boy Three\Waiting\07 Our Lips Are Sealed.m4a` — [03:35]
+- **Peter Gabriel - Solsbury Hill**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Peter Gabriel\Shaking the Tree_ Sixteen Golden Greats\01 Solsbury Hill.m4a` — [04:20]
+- **Marvin Gaye - What's Going On**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Marvin Gaye\The Very Best of Marvin Gaye\2-01 What's Going On.m4a` — [03:52]
+- **Marvin Gaye - Mercy Mercy Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Marvin Gaye\The Very Best of Marvin Gaye\2-02 Mercy Mercy Me (The Ecology).m4a` — [03:13]
+- **Marvin Gaye - Inner City Blues**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Marvin Gaye\The Very Best of Marvin Gaye\2-03 Inner City Blues (Make Me Wanna.m4a` — [05:28]
+- **Robert Palmer - Mercy Mercy Me**
+  -`\\GAMES\Utils\iTunes\iTunes Media\Music\Robert Palmer\Best of Both Worlds_ The Robert Palmer A\2-13 Mercy Mercy Me (The Ecology) _.m4a` - [03:55]
+- **Gazebo - I Like Chopin**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\NDR2_ XXL Maxi Hits\3-12 I Like Chopin (extended dance v.m4a` — [07:36]
+- **Gorillaz - Clint Eastwood**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Gorillaz\The Singles Collection 2001–2011\02 Clint Eastwood.m4a` — [05:32]
+- **Rupert Holmes - Escape**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Unknown Album\16 Escape (The Pina Colada Song).m4a` — [04:40]
+- **Billy Idol - Sweet Sixteen**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Idol\Greatest Hits\11 Sweet Sixteen.m4a` — [04:14]
+- **Billy Idol - Hot in the City**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Idol\Greatest Hits\03 Hot In The City.m4a` — [03:33]
+- **Joe Jackson - Is She Really Going Out With Him?**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Joe Jackson\Stepping Out_ The Very Best of Joe Jacks\01 Is She Really Going Out With Him_.m4a` — [03:37]
+- **Joe Jackson - Breaking Us in Two**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Joe Jackson\This Is It_ The A&M Years – 1979–1989\2-01 Breaking Us in Two.m4a` — [04:50]
+- **Michael Jackson - Human Nature**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Michael Jackson\Thriller\07 Human Nature.m4a` — [04:05]
+- **Jamiroquai - Too Young to Die**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Jamiroquai\Emergency on Planet Earth\02 Emergency on Planet Earth (extend.m4a` — [04:05]
+- **Billy Joel - A Matter of Trust**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\Greatest Hits, Volume III\03 A Matter of Trust.m4a` — [04:09]
+- **Billy Joel - Piano Man**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\Piano Man\02 Piano Man.m4a` — [05:39]
+- **Billy Joel - New York State of Mind**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\Greatest Hits, Volume I & Volume II\1-05 New York State of Mind.m4a` — [06:02]
+- **Billy Joel - Movin' Out**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\The Stranger\01 Movin_ Out (Anthony_s Song).m4a` — [03:30]
+- **Billy Joel - My Life**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\The Ultimate Collection\1-02 My Life.m4a` — [04:43]
+- **Billy Joel - Allentown**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\The Nylon Curtain\01 Allentown.m4a` — [03:52]
+- **Elton John - Nikita**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Elton John\Greatest Hits, Volume III_ 1979–1987\11 Nikita.m4a` — [05:44]
+- **Grace Jones - La Vie en Rose**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Grace Jones\The Collection\07 La Vie en rose.m4a` — [07:27]
+- **Grace Jones -  I've Seen That Face Before**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Grace Jones\The Collection\15 I've Seen That Face Before (Liber.m4a` — [04:30]
+- **Howard Jones - Hide and Seek**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Howard Jones\The Best of Howard Jones\09 Hide and Seek.m4a` — [04:49]
+- **Julian Lennon - Valotte**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Julian Lennon\Valotte\01 Valotte.m4a` — [04:15]
+- **Madonna - What It Feels Like for a Girl**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Madonna\Die Another Day\06 What It Feels Like for a Girl.m4a` — [02:05]
+- **Mashina - רני בפריז**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\משינה\גבירותי ורבותי משינה\11 רני בפריז.m4a` — [04:29]
+- **Dave Matthews Band - Crush**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Dave Matthews Band\Before These Crowded Streets\08 Crush (longVer).m4a` — [08:09]
+- **Dave Matthews Band - Crash into Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Dave Matthews Band\Crash Into Me\01 Crash Into Me (edit).m4a` — [04:22]
+- **Malcolm McLaren - Jazz Is Paris**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Malcolm McLaren\Paris\05 Jazz Is Paris.m4a` — [05:16]
+- **Izhar Ashdot, להקה רטורית, Meni Beger - סדר יום**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\סוף עונת התפוזים\1-08 סדר יום.m4a` — [03:52]
+- **Julian Lennon - Too Late for Goodbyes**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Julian Lennon\Valotte\06 Too Late for Goodbyes.m4a` — [03:33]
+- **David McWilliams - Days of Pearly Spencer**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Heartbeat Summer\2-21 Days of Pearly Spencer.m4a` — [02:29]
+- **Pat Metheny Group - Last Train Home**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Pat Metheny Group\Still Life (Talking)\03 Last Train Home.m4a` — [05:41]
+- **Moby - Porcelain**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Moby\Greatest Hits\1-04 Porcelain.m4a` — [04:01]
+- **Nikmat HaTraktor - משחק של דמעות**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\נקמת הטרקטור\10-02 משחק של דמעות.m4a` — [05:09]
+- **Nouvelle Vague - Love Will Tear Us Apart**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nouvelle Vague\Nouvelle Vague\01 Love Will Tear Us Apart.m4a` — [03:18]
+- **Nouvelle Vague - In a Manner of Speaking**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nouvelle Vague\Nouvelle Vague\03 In a Manner of Speaking.m4a` — [03:57]
+- **Tina Turner - I Can’t Stand the Rain**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tina Turner\Greatest Hits\2-14 I Can_t Stand the Rain.m4a` — [03:43]
+---
+
+## energetic_upbeat (90 tracks)
+- **ABBA - Voulez-Vous**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\ABBA\The Definitive Collection\2-01 Voulez-Vous.m4a` — [05:09]
+- **ABBA - Gimme! Gimme! Gimme!**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\ABBA\The Definitive Collection\2-03 Gimme! Gimme! Gimme! (A Man Aft.m4a` — [04:50]
+- **Aerosmith / Run‐D.M.C. - Walk This Way**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Aerosmith\O, Yeah! Ultimate Aerosmith Hits\2-12 Walk This Way.m4a` — [05:09]
+- **a‐ha - Train Of Thought**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\a‐ha\Hunting High and Low\1-02 Train of Thought.m4a` — [04:14]
+- **The Animals - We Gotta Get Out of This Place**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Animals\The Best of\03 We_ve Gotta Get Out of This Place.m4a` — [03:11]
+- **The B‐52s - Love Shack**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The B‐52_s\Cosmic Thing\04 Love Shack 2.m4a` — [05:21] 
+- **Bee Gees - You Should Be Dancing**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bee Gees\The Ultimate Bee Gees\1-01 You Should Be Dancing.m4a` — [04:16]
+- **Blondie - Call Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Blondie\Greatest Hits Deluxe Redux\09 Call Me.m4a` — [03:31]
+- **David Bowie - Let's Dance**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\David Bowie\Changesbowie\15 Let_s Dance.m4a` — [04:10]
+- **David Bowie - Modern Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\David Bowie\The Singles Collection\2-13 Modern Love.m4a` — [03:57]
+- **Laura Branigan - Self Control**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Laura Branigan\The Best of Branigan\12 Self Control.m4a` — [03:59]
+- **The Crazy World of Arthur Brown, Arthur Brown, Arnold Brown - Fire**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Arthur Brown\The Crazy World of Arthur Brown\08 Fire.m4a` — [02:54]
+- **James Brown - Get Up Sex Machine**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\James Brown\Get On Up_ The James Brown Story\01 Get Up (I Feel Like Being a) Sex.m4a` — [05:18]
+- **Creedence Clearwater Revival - Fortunate Son**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Creedence Clearwater Revival\Willy and the Poor Boys\06 Fortunate Son.m4a` — [02:21]
+- **The Spencer Davis Group - Gimme Some Lovin'**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Spencer Davis Group\Gimme Some Lovin'\04 Gimme Some Lovin'.m4a` — [03:00]
+- **Dire Straits - Walk of Life**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Dire Straits\Sultans of Swing_ The Very Best of Dire\11 Walk of Life.m4a` — [04:12]
+- **Duran Duran - Rio**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Duran Duran\Rio\01 Rio.m4a` — [05:39]
+- **Earth, Wind & Fire - Fantasy**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Earth, Wind & Fire\The Essential Earth, Wind & Fire\1-03 Fantasy.m4a` — [04:36]
+- **Earth, Wind & Fire  -Let's Groove**
+  - `\\GAMES\Utils\\iTunes\iTunes Media\Music\Earth, Wind & Fire\The Essential Earth, Wind & Fire\1-14 Let's Groove.m4a` - [05:32]
+- **The Easybeats - Friday On My Mind**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Easybeats\Friday on My Mind\06 Friday on My Mind.m4a` — [02:42]
+- **Foreigner - Blue Morning, Blue Day**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Foreigner\Double Vision\02 Blue Morning, Blue Day.m4a` — [03:12]
+- **Four Tops - Reach Out**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Four Tops\Reach Out I_ll Be There\03 Reach Out I_ll Be There.m4a` — [02:57]
+- **Free - All Right Now**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Free\All Right Now_ The Collection\01 All Right Now.m4a` — [05:34]
+- **Max Frost & the Troopers - Shape of Things to Come**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Nuggets_ Original Artyfacts From the Fir\2-31 Shape of Things to Come.m4a` — [01:54]
+- **Peter Gabriel - Shock the Monkey**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Peter Gabriel\Shaking the Tree_ Sixteen Golden Greats\12 Shock the Monkey.m4a` — [03:57]
+- **Peter Gabriel - Big Time**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Peter Gabriel\Shaking the Tree_ Sixteen Golden Greats\14 Big Time.m4a` — [04:25]
+- **Genesis - Turn It On Again**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Genesis\Duke\07 Turn It On Again.m4a` — [03:51]
+- **EMF - Unbelievable**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Las 101 canciones de E.G.B_\4-17 Unbelievable.m4a` — [03:33]
+- **Erasure - Love to Hate You**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Erasure\Pop! The First 20 Hits\17 Love to Hate You.m4a` — [03:56]
+- **Genesis - That's All**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Genesis\Genesis\02 That_s All 1.m4a` — [04:28]
+- **Genesis - Invisible Touch**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Genesis\Invisible Touch\01 Invisible Touch.m4a` — [03:31]
+- **Genesis - Land of Confusion**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Genesis\Invisible Touch\03 Land of Confusion.m4a` — [04:48]
+- **Gipsy Kings - Bamboleo**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Gipsy Kings\The Best of the Gipsy Kings\18 Bamboleo _ Volaré _ Djobi, Djoba.m4a` — [04:46]
+- **Gidi Gov - אני שוב מתאהב**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\גידי גוב\אין עוד יום\08 אני שוב מתאהב.m4a` — [05:24]
+- **The Grass Roots - Let's Live For Today**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Let's Live for Today\16 Let's Live For Today.m4a` — [03:07]
+- **George Michael - Too Funky**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Too Funky\01 Too Funky.m4a` — [03:48]
+- **George Michael - Outside**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Outside\01 Outside.m4a` — [04:47]
+- **Guns N’ Roses - Welcome to the Jungle**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Guns N_ Roses\Appetite for Destruction\01 Welcome to the Jungle.m4a` — [04:33]
+- **Daryl Hall & John Oates - Maneater**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Daryl Hall & John Oates\The Very Best of Daryl Hall & John Oates\11 Maneater.m4a` — [04:34]
+- **MC Hammer - U Can't Touch This**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Rap Fieber\1-11 U Can't Touch This.m4a` — [04:15]
+- **Huey Lewis and the News - The Power of Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Huey Lewis & the News\Greatest Hits\03 The Power of Love.m4a` — [03:54]
+- **Billy Idol - Cradle of Love**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Idol\Greatest Hits\12 Cradle Of Love.m4a` — [04:38]
+- **INXS - Suicide Blonde**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\INXS\X\01 Suicide Blonde.m4a` — [03:52]
+- **Michael Jackson - Don't Stop 'til You Get Enough**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Michael Jackson\HIStory_ Past, Present and Future, Book\2-02 Don_t Stop _til You Get Enough.m4a` — [06:04]
+- **Billy Joel - We Didn't Start the Fire**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Billy Joel\Storm Front\02 We Didn't Start the Fire.m4a` — [04:50]
+- **Nik Kershaw - I Won't Let the Sun Go Down on Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nik Kershaw\The Collection\02 I Won_t Let the Sun Go Down on Me.m4a` — [03:18]
+- **The Kinks - You Really Got Me**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Kinks\The Anthology 1964–1971\1-08 You Really Got Me.m4a` — [02:14]
+- **Led Zeppelin - Ramble On**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Led Zeppelin\Mothership\1-06 Ramble On.m4a` — [04:22]
+- **Madonna - Open Your Heart**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Madonna\Celebration\16 Open Your Heart.m4a` — [03:49]
+- **Madonna - Material Girl**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Madonna\Like a Virgin\01 Material Girl.m4a` — [04:01]
+- **Madonna - Holiday**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Madonna\Madonna\05 Holiday.m4a` — [06:10]
+- **Mashina - שלג צח**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\משינה\משינה 3\01 שלג צח.m4a` — [03:22]
+- **Paul McCartney, Wings - Coming Up**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Paul McCartney\Wingspan_ Hits and History\1-17 Coming Up.m4a` — [04:45]
+- **Paul McCartney, Wings, Howie Casey - Mrs. Vandebilt**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Compilations\Wings Greatest\45 Mrs. Vandebilt.m4a` — [03:51]
+- **Metallica - Enter Sandman**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Metallica\Metallica\01 Enter Sandman.m4a` — [05:31]
+- **Talking Heads - And She Was**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Talking Heads\Once in a Lifetime_ The Best Of\08 And She Was.m4a` — [03:39]
+- **George Michael - I Want Your Sex, Pts. 1 & 2**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Faith\03 I Want Your Sex, Parts 1 & 2.m4a` — [09:17]
+- **George Michael - Monkey**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Faith\08 Monkey.m4a` — [05:06]
+- **George Michael - Papa Was a Rollin' Stone**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Ladies & Gentlemen_ The Best of George M\2-06 Killer _ Papa Was a Rollin' Sto.m4a` — [04:16]
+- **George Michael - Flawless**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\George Michael\Greatest Hits\2-06 Flawless (Go to the City).m4a` — [04:50]
+- **Steve Miller Band, Steve Miller - The Joker**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Steve Miller Band\The Joker\05 The Joker.m4a` — [04:26]
+- **Moby - Natural Blues**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Moby\Greatest Hits\1-01 Natural Blues.m4a` — [04:13]
+- **The Monkees - I'm a Believer**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Monkees\The Best of the Monkees\05 I_m a Believer.m4a` — [02:46]
+- **The Human League - Together in Electric Dreams**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\The Human League\Greatest Hits\14 Together in Electric Dreams.m4a` — [03:53]
+- **Alison Moyet - Love Resurrection**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Alison Moyet\Singles\05 Love Resurrection.m4a` — [03:52]
+- **Nena - 99 Red Balloons**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nena\99 Red Balloons\01 99 Red Balloons.m4a` — [03:54]
+- **New Order - True Faith**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\New Order\(The Best of) New Order\01 True Faith-94.m4a` — [04:27]
+- **New Order - Bizarre Love Triangle**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\New Order\(The Best of) New Order\02 Bizarre Love Triangle-94 2.m4a` — [03:51]
+- **New Order - Regret**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\New Order\(The Best of) New Order\04 Regret.m4a` — [04:08]
+- **New Order - Crystal**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\New Order\International\1-12 Crystal.m4a` — [06:51]
+- **New Radicals - You Get What You Give**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\New Radicals\Maybe You've Been Brainwashed Too\02 You Get What You Give.m4a` — [05:02]
+- **John Newman - Love Me Again**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\John Newman\Love Me Again\01 Love Me Again.m4a` — [03:54]
+- **Stevie Nicks - Edge of Seventeen**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Stevie Nicks\Timespace_ The Best of Stevie Nicks\10 Edge of Seventeen.m4a` — [05:28]
+- **Nirvana - Heart Shaped Box**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nirvana\In Utero\03 Heart‐Shaped Box.m4a` — [04:40]
+- **Nirvana - Smells Like Teen Spirit**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nirvana\Nevermind\01 Smells Like Teen Spirit.m4a` — [05:01]
+- **Nirvana - In Bloom**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nirvana\Nevermind\02 In Bloom.m4a` — [04:15]
+- **Nirvana - Lithium**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Nirvana\Nevermind\05 Lithium.m4a` — [04:17]
+- **Gary Numan - Cars**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Gary Numan\The Pleasure Principle\09 Cars.m4a` — [03:57]
+- **Gary Numan - Are 'Friends' Electric**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tubeway Army\Replicas Redux\1-02 Are _Friends_ Electric_.m4a` - [5:25]
+- **U2 - Even Better Than the Real Thing**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\U2\Achtung Baby\02 Even Better Than the Real Thing.m4a` — [03:38]
+- **Sinéad O’Connor - The Emperor's New Clothes**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Sinéad O_Connor\I Do Not Want What I Haven_t Got\04 The Emperor_s New Clothes.m4a` — [05:16]
+- **U2 - Mysterious Ways**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\U2\Achtung Baby\08 Mysterious Ways.m4a` - [04:02]
+- **Bruce Springsteen - Dancing In The Dark**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bruce Springsteen\Greatest Hits\07 Dancing in the Dark.m4a` - [04:02]
+- **Bruce Springsteen - Glory Days**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Bruce Springsteen\Greatest Hits\10 Glory Days.m4a` - [03:49]
+- **Tears for Fears - Shout**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Tears for Fears\Tears Roll Down (Greatest Hits 82-92)\04 Shout.m4a` - [06:33]
+- **Paul Simon - Graceland**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Paul Simon\The Essential Paul Simon\2-01 Graceland.m4a` - [04:46]
+- **Murray Head - One Night in Bangkok**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Murray Head\One Night in Bangkok\01 One Night in Bangkok.m4a` - [05:38]
+- **Blur - Song 2**
+  - `\\GAMES\Utils\iTunes\iTunes Media\Music\Blur\Blur\1-02 Song 2.m4a` - [02:01]
+## Summary
+
+| Metric | Count |
+|---|---|
+| Total tracks | 250 |
+

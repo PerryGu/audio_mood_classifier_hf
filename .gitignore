@@ -1,0 +1,12 @@
+# Existing
+.venv/
+__pycache__/
+*.pyc
+data/
+data_generation/ffmpeg.exe
+.env
+
+# Suggested additions
+runs/
+models/
+wandb/
