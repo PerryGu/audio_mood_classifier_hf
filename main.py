@@ -9,18 +9,20 @@ import os
 import sys
 
 # ── Colab Configuration ───────────────────────────────────────────────────────
-# Set this to the path of your project folder inside Google Drive.
+# Set this to the absolute path of your project folder in Colab.
+#   • Project uploaded directly to Colab:  "/content/audio_mood_classifier_hf"
+#   • Project stored in Google Drive:      "/content/drive/MyDrive/audio_mood_classifier_hf"
+#     (mount Drive first in a notebook cell before running this script — see README)
 # This is the ONLY line you need to change when running in Colab.
 # Leave it unchanged for local execution — it is ignored automatically.
-COLAB_PROJECT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf"
+COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 
-# Bootstrap for Colab: mounts Google Drive and sets the working directory so
-# that all relative paths (data/, models/, runs/) and local imports (src.*)
-# resolve correctly — identical to how they work locally when the project root
-# is the CWD.  Must run BEFORE any local imports so Python can find them.
+# Bootstrap for Colab: sets the working directory so that all relative paths
+# (data/, models/, runs/) and local imports (src.*) resolve correctly.
+# NOTE: drive.mount() is intentionally NOT called here — it requires an IPython
+# kernel and must be run in a notebook cell, not from a script.
 try:
-    from google.colab import drive as _colab_drive   # type: ignore
-    _colab_drive.mount("/content/drive", force_remount=False)
+    import google.colab  # type: ignore  — just checks we are in Colab
     if COLAB_PROJECT_PATH and os.path.isdir(COLAB_PROJECT_PATH):
         os.chdir(COLAB_PROJECT_PATH)
         if COLAB_PROJECT_PATH not in sys.path:
@@ -28,8 +30,9 @@ try:
         print(f"[INFO] Colab: working directory set to '{COLAB_PROJECT_PATH}'.")
     else:
         print(
-            f"[WARN] Colab: path '{COLAB_PROJECT_PATH}' not found after mounting Drive.\n"
-            f"       Update COLAB_PROJECT_PATH at the top of main.py and re-run."
+            f"[WARN] Colab: path '{COLAB_PROJECT_PATH}' not found.\n"
+            f"       Update COLAB_PROJECT_PATH at the top of main.py and re-run.\n"
+            f"       If the project is in Drive, mount Drive in a notebook cell first."
         )
 except ImportError:
     pass  # Local execution — no Colab bootstrap needed.

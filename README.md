@@ -76,15 +76,17 @@ audio_mood_classifier_hf/
 
 ## Quick Start
 
-### 1. Install dependencies
+### Running locally
+
+**1. Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> **Note:** Requires `ffmpeg` on `PATH` for MP3 encoding (used by `pydub` during data generation).
+> Requires `ffmpeg` on `PATH` for MP3 encoding (used by `pydub` during data generation only — not needed for training).
 
-### 2. Set up credentials
+**2. Set up credentials**
 
 Create a `.env` file in the project root:
 
@@ -92,7 +94,7 @@ Create a `.env` file in the project root:
 HF_TOKEN=your_huggingface_token_here
 ```
 
-### 3. Run the pipeline
+**3. Run the pipeline**
 
 ```bash
 # Train and evaluate (default)
@@ -110,6 +112,66 @@ python main.py --debug
 
 ---
 
+### Running in Google Colab
+
+**1. Get the project into Colab**
+
+You have two options:
+
+| Option | How | `COLAB_PROJECT_PATH` to set |
+|---|---|---|
+| Upload directly | Upload the folder via *Files → Upload* or `!unzip` | `"/content/audio_mood_classifier_hf"` |
+| Keep it in Drive | Copy the folder to your Google Drive | `"/content/drive/MyDrive/audio_mood_classifier_hf"` |
+
+The project folder must contain `data/mp3_data/` with your labeled MP3 segments. If you already have a `data/processed_dataset/` cache from a previous run, only that folder is needed — the raw `mp3_data/` can be omitted.
+
+**2. If using Google Drive — mount it first**
+
+`drive.mount()` requires the IPython kernel and must be called from a **notebook cell**, not from a script. Run this in a cell before executing `main.py`:
+
+```python
+from google.colab import drive
+drive.mount("/content/drive")
+```
+
+If the project is uploaded directly to `/content/`, skip this step entirely.
+
+**3. Set your project path**
+
+Open `main.py` and update the single line at the top to match where your project lives:
+
+```python
+# Direct upload:
+COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
+
+# In Google Drive:
+COLAB_PROJECT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf"
+```
+
+**4. Add your Hugging Face token to Colab Secrets**
+
+In the Colab left sidebar open the **🔑 Secrets** panel and add a secret named `HF_TOKEN`. The code reads it automatically — no `.env` file needed.
+
+**5. Select a GPU runtime**
+
+Go to **Runtime → Change runtime type** and select a GPU (T4 or better). The optimizer automatically falls back to standard AdamW if no GPU is detected, but training on CPU will be extremely slow.
+
+**6. Run**
+
+```python
+!python main.py
+```
+
+When `main.py` starts it will automatically:
+- Change the working directory to your project folder (so all relative paths resolve)
+- Install the few packages not bundled with Colab (`librosa`, `pyloudnorm`, `pydub`, `mutagen`, `python-dotenv`)
+- Read your `HF_TOKEN` from Secrets
+- Then proceed with the normal pipeline
+
+All output folders (`models/`, `runs/`) are written into your project folder and persist in Drive across sessions.
+
+---
+
 ## Training Configuration
 
 Hyperparameters are set at the top of `main.py` and applied to the `TrainingConfig` object:
@@ -119,7 +181,7 @@ Hyperparameters are set at the top of `main.py` and applied to the `TrainingConf
 | `BASE_LEARNING_RATE` | `1e-5` | Learning rate for AdamW |
 | `BATCH_SIZE` | `32` | Per-device training batch size |
 | `NUM_TRAIN_EPOCHS` | `8` | Total training epochs |
-| `OPTIMIZER_NAME` | `adamw_torch_fused` | PyTorch fused AdamW |
+| `OPTIMIZER_NAME` | `adamw_torch_fused` / `adamw_torch` | Fused AdamW on GPU, standard AdamW on CPU (auto-detected) |
 | `LOGGING_STEPS` | `50` | TensorBoard log frequency |
 | `REPORT_TO` | `tensorboard` | `"tensorboard"` \| `"wandb"` \| `"all"` |
 
@@ -179,7 +241,7 @@ Produces `128-bin dB-scaled Mel-spectrogram PNGs` (400×400 px, magma colormap) 
 `main.py` drives a single `PipelineManager` instance through these ordered stages:
 
 ```
-setup_environment()         ← load HF_TOKEN from .env or Colab userdata
+setup_environment()         ← install missing packages (Colab) + load HF_TOKEN
 run_data_loading()          ← load MP3s with librosa → HF Dataset (cached to disk)
 run_model_loading()         ← load MIT AST + ASTFeatureExtractor (freeze base, train head)
 prepare_dataset()           ← extract input_values via ASTFeatureExtractor (cached)
@@ -217,6 +279,8 @@ loss              — cross-entropy
 
 ## TensorBoard
 
+**Locally:**
+
 ```bash
 # Current session only
 tensorboard --logdir runs
@@ -225,7 +289,19 @@ tensorboard --logdir runs
 tensorboard --logdir runs/continuous
 ```
 
-Each training session writes to its own timestamped folder under `runs/`. The `continuous/` directory accumulates logs from resumed sessions with correct global step offsets so all sessions appear as a single unbroken learning curve.
+**In Colab:**
+
+```python
+%load_ext tensorboard
+
+# Current session only
+%tensorboard --logdir runs
+
+# Full continuous history
+%tensorboard --logdir runs/continuous
+```
+
+Each training session writes to its own timestamped folder under `runs/`. The `continuous/` directory accumulates logs from resumed sessions with correct global step offsets so all sessions appear as a single unbroken learning curve. In Colab, both folders live in your Drive and remain available across sessions.
 
 ---
 
