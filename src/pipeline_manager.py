@@ -8,6 +8,7 @@ without the need for full session restarts.
 """
 
 import os
+import sys
 import torch
 
 from src.utils import tests
@@ -78,18 +79,45 @@ class PipelineManager:
     # =========================================================================
     def setup_environment(self):
         """
-        Retrieves the Hugging Face token. 
-        Checks for Google Colab userdata first, otherwise falls back to local .env file.
+        Prepares the runtime environment for both local and Google Colab execution.
+
+        Colab:
+          - Installs packages that are not bundled with the default Colab runtime
+            (torch, transformers, datasets, etc. are already present).
+          - Reads HF_TOKEN from Colab Secrets (Add via the 🔑 panel on the left).
+
+        Local:
+          - Loads HF_TOKEN from the .env file in the project root.
         """
         try:
-            from google.colab import userdata
-            self.hf_token = userdata.get('HF_TOKEN')
+            from google.colab import userdata   # type: ignore
+
+            # Packages missing from the default Colab runtime.
+            # torch, transformers, datasets, numpy, pandas, sklearn, tqdm are pre-installed.
+            _colab_packages = [
+                "librosa==0.11.0",
+                "pyloudnorm==0.2.0",
+                "pydub==0.25.1",
+                "mutagen==1.48.1",
+                "python-dotenv==1.2.2",
+            ]
+            print("[INFO] Colab: installing missing runtime packages...")
+            import subprocess
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "-q"] + _colab_packages,
+                check=False,
+            )
+            print("[INFO] Colab: packages ready.")
+
+            self.hf_token = userdata.get("HF_TOKEN")
             print("[INFO] Google Colab environment detected.")
+
         except ImportError:
             from dotenv import load_dotenv
             load_dotenv()
             self.hf_token = os.getenv("HF_TOKEN")
             print("[INFO] Local environment detected.")
+
         return self.hf_token
 
     # =========================================================================

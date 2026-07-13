@@ -6,6 +6,35 @@ by utilizing the PipelineManager. This modular approach ensures a clean,
 reproducible workflow for training and inference.
 """
 import os
+import sys
+
+# ── Colab Configuration ───────────────────────────────────────────────────────
+# Set this to the path of your project folder inside Google Drive.
+# This is the ONLY line you need to change when running in Colab.
+# Leave it unchanged for local execution — it is ignored automatically.
+COLAB_PROJECT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf"
+
+# Bootstrap for Colab: mounts Google Drive and sets the working directory so
+# that all relative paths (data/, models/, runs/) and local imports (src.*)
+# resolve correctly — identical to how they work locally when the project root
+# is the CWD.  Must run BEFORE any local imports so Python can find them.
+try:
+    from google.colab import drive as _colab_drive   # type: ignore
+    _colab_drive.mount("/content/drive", force_remount=False)
+    if COLAB_PROJECT_PATH and os.path.isdir(COLAB_PROJECT_PATH):
+        os.chdir(COLAB_PROJECT_PATH)
+        if COLAB_PROJECT_PATH not in sys.path:
+            sys.path.insert(0, COLAB_PROJECT_PATH)
+        print(f"[INFO] Colab: working directory set to '{COLAB_PROJECT_PATH}'.")
+    else:
+        print(
+            f"[WARN] Colab: path '{COLAB_PROJECT_PATH}' not found after mounting Drive.\n"
+            f"       Update COLAB_PROJECT_PATH at the top of main.py and re-run."
+        )
+except ImportError:
+    pass  # Local execution — no Colab bootstrap needed.
+# ─────────────────────────────────────────────────────────────────────────────
+
 import argparse
 from src.pipeline_manager import PipelineManager
 
@@ -37,8 +66,10 @@ def main():
     # === TRAINING HYPERPARAMETERS ===
     BASE_LEARNING_RATE = 1e-5
     BATCH_SIZE = 32
-    NUM_TRAIN_EPOCHS = 8
-    OPTIMIZER_NAME = "adamw_torch_fused"
+    NUM_TRAIN_EPOCHS = 20
+    # adamw_torch_fused is CUDA-only; fall back to standard AdamW on CPU.
+    import torch as _torch
+    OPTIMIZER_NAME = "adamw_torch_fused" if _torch.cuda.is_available() else "adamw_torch"
     LOGGING_STEPS = 50
     REPORT_TO = "tensorboard"           # "tensorboard" | "wandb" | "all"
     WANDB_PROJECT = "audio-mood-classifier"
@@ -47,8 +78,8 @@ def main():
     # Leave both empty for a clean new run.
     # Fill both to resume weights from a previous checkpoint.
     # A fresh timestamped output folder is ALWAYS created regardless.
-    RESUME_RUN_FOLDER = "mood_classifier_2026-07-13_13-22"  # e.g. "mood_classifier_2026-07-12_20-20"
-    RESUME_CKPT_NAME  = "checkpoint-62"   # e.g. "checkpoint-248"
+    RESUME_RUN_FOLDER = ""  # e.g. "mood_classifier_2026-07-12_20-20"
+    RESUME_CKPT_NAME  = ""   # e.g. "checkpoint-248"
 
     # Update the config object
     mgr.config.learning_rate = BASE_LEARNING_RATE
