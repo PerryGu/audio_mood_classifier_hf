@@ -128,15 +128,19 @@ def main():
 
     mgr.setup_environment()
 
-    # Override model checkpoint with a local path when available in Colab.
-    # This bypasses the HF Hub download entirely (wget is used instead).
+    # Override model checkpoint with a local path when set by the notebook cell.
+    # The notebook sets COLAB_MODEL_PATH_OVERRIDE to the copied local path (Drive source)
+    # or leaves it empty to fall through to HF Hub download.
     try:
         import google.colab  # type: ignore
-        safetensors_ok = os.path.isfile(os.path.join(COLAB_MODEL_PATH, "model.safetensors"))
-        pytorch_ok = os.path.isfile(os.path.join(COLAB_MODEL_PATH, "pytorch_model.bin"))
-        if COLAB_MODEL_PATH and os.path.isdir(COLAB_MODEL_PATH) and (safetensors_ok or pytorch_ok):
-            mgr.config.model_ckpt = COLAB_MODEL_PATH
-            print(f"[INFO] Colab: loading model from local path '{COLAB_MODEL_PATH}'.")
+        _override = os.environ.get("COLAB_MODEL_PATH_OVERRIDE", "")
+        _st_ok = os.path.isfile(os.path.join(_override, "model.safetensors"))
+        _pt_ok = os.path.isfile(os.path.join(_override, "pytorch_model.bin"))
+        if _override and os.path.isdir(_override) and (_st_ok or _pt_ok):
+            mgr.config.model_ckpt = _override
+            print(f"[INFO] Colab: loading model from local path '{_override}'.")
+        else:
+            print("[INFO] Colab: loading model from HuggingFace Hub.")
     except ImportError:
         pass
 
