@@ -23,11 +23,6 @@ COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 #     from google.colab import drive; drive.mount('/content/drive')
 COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
 
-# Path to a locally downloaded model directory (avoids HF Hub download in Colab).
-# Run the "Download model" notebook cell to populate this directory with wget,
-# then main.py will load from disk instantly — no network download needed.
-# Set to "" to download from HF Hub as normal.
-COLAB_MODEL_PATH = ""
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Bootstrap for Colab: sets the working directory so that all relative paths
@@ -128,21 +123,19 @@ def main():
 
     mgr.setup_environment()
 
-    # Override model checkpoint with a local path when set by the notebook cell.
-    # The notebook sets COLAB_MODEL_PATH_OVERRIDE to the copied local path (Drive source)
-    # or leaves it empty to fall through to HF Hub download.
-    try:
-        import google.colab  # type: ignore
-        _override = os.environ.get("COLAB_MODEL_PATH_OVERRIDE", "")
-        _st_ok = os.path.isfile(os.path.join(_override, "model.safetensors"))
-        _pt_ok = os.path.isfile(os.path.join(_override, "pytorch_model.bin"))
-        if _override and os.path.isdir(_override) and (_st_ok or _pt_ok):
-            mgr.config.model_ckpt = _override
-            print(f"[INFO] Colab: loading model from local path '{_override}'.")
-        else:
-            print("[INFO] Colab: loading model from HuggingFace Hub.")
-    except ImportError:
-        pass
+    # If the pre-trained base model has been saved locally (inside the project at
+    # models/ast_pretrained/), load it from disk — no network download needed.
+    # This works identically on a local machine and in Colab.
+    # To use it: copy model.safetensors + config.json + preprocessor_config.json
+    # into ./models/ast_pretrained/ and the pipeline will pick them up automatically.
+    _local_model = os.path.join(os.getcwd(), "models", "ast_pretrained")
+    _st_ok = os.path.isfile(os.path.join(_local_model, "model.safetensors"))
+    _pt_ok = os.path.isfile(os.path.join(_local_model, "pytorch_model.bin"))
+    if os.path.isdir(_local_model) and (_st_ok or _pt_ok):
+        mgr.config.model_ckpt = _local_model
+        print(f"[INFO] Loading pre-trained model from project folder '{_local_model}'.")
+    else:
+        print("[INFO] Loading pre-trained model from HuggingFace Hub.")
 
     # 1. LOADING DATASET & MODEL
     # =========================================================================
