@@ -125,38 +125,46 @@ You have two options:
 
 The project folder must contain `data/mp3_data/` with your labeled MP3 segments. If you already have a `data/processed_dataset/` cache from a previous run, only that folder is needed — the raw `mp3_data/` can be omitted.
 
-**2. If using Google Drive — mount it first**
+**2. Upload your MP3 data to Google Drive**
 
-`drive.mount()` requires the IPython kernel and must be called from a **notebook cell**, not from a script. Run this in a cell before executing `main.py`:
+Place the `mp3_data.zip` file somewhere in your Drive, for example:
+
+```
+My Drive/audio_mood_classifier/mp3_data.zip
+```
+
+The zip can contain the three category folders either directly at the root, or wrapped inside one folder — both structures are detected and handled automatically. The zip is extracted once into `data/mp3_data/` inside the project and skipped on every subsequent run.
+
+**3. Mount Google Drive** (in a notebook cell, before running the script)
+
+`drive.mount()` requires the IPython kernel and cannot be called from a script. Run this once in a Colab cell:
 
 ```python
 from google.colab import drive
 drive.mount("/content/drive")
 ```
 
-If the project is uploaded directly to `/content/`, skip this step entirely.
+**4. Set your paths**
 
-**3. Set your project path**
-
-Open `main.py` and update the single line at the top to match where your project lives:
+Open `main.py` and update the two lines at the top of the Colab configuration block:
 
 ```python
-# Direct upload:
+# Path to your project folder in Colab
 COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 
-# In Google Drive:
-COLAB_PROJECT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf"
+# Path to your mp3_data.zip in Google Drive
+COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
 ```
 
-**4. Add your Hugging Face token to Colab Secrets**
+**5. Add your Hugging Face token to Colab Secrets**
 
 In the Colab left sidebar open the **🔑 Secrets** panel, add a secret named `HF_TOKEN`, and make sure the **Notebook access** toggle is switched **on**. With notebook access enabled, Colab exposes the secret as a regular environment variable that the script can read with `os.getenv("HF_TOKEN")` — no `.env` file needed, and no IPython kernel required.
 
-**5. Select a GPU runtime**
+**6. Select a GPU runtime**
 
 Go to **Runtime → Change runtime type** and select a GPU (T4 or better). The optimizer automatically falls back to standard AdamW if no GPU is detected, but training on CPU will be extremely slow.
 
-**6. Run**
+**7. Run**
 
 ```python
 !python main.py

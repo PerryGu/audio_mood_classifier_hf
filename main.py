@@ -9,13 +9,26 @@ import os
 import sys
 
 # ── Colab Configuration ───────────────────────────────────────────────────────
-# Set this to the absolute path of your project folder in Colab.
-#   • Project uploaded directly to Colab:  "/content/audio_mood_classifier_hf"
-#   • Project stored in Google Drive:      "/content/drive/MyDrive/audio_mood_classifier_hf"
-#     (mount Drive first in a notebook cell before running this script — see README)
-# This is the ONLY line you need to change when running in Colab.
-# Leave it unchanged for local execution — it is ignored automatically.
+# These are the only two lines you need to change when running in Colab.
+# Both are ignored automatically on a local machine.
+
+# Path to the project folder in Colab (uploaded directly or via Drive).
 COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
+
+# Path to the mp3_data.zip file in Google Drive.
+# The zip should contain the three category folders (calm_melancholic,
+# energetic_upbeat, moderate_neutral) either at the root or inside one
+# wrapper folder — both structures are handled automatically.
+# Mount Drive in a notebook cell before running this script:
+#     from google.colab import drive; drive.mount('/content/drive')
+COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
+
+# Path to a locally downloaded model directory (avoids HF Hub download in Colab).
+# Run the "Download model" notebook cell to populate this directory with wget,
+# then main.py will load from disk instantly — no network download needed.
+# Set to "" to download from HF Hub as normal.
+COLAB_MODEL_PATH = "/content/ast_model"
+# ─────────────────────────────────────────────────────────────────────────────
 
 # Bootstrap for Colab: sets the working directory so that all relative paths
 # (data/, models/, runs/) and local imports (src.*) resolve correctly.
@@ -34,6 +47,8 @@ try:
             f"       Update COLAB_PROJECT_PATH at the top of main.py and re-run.\n"
             f"       If the project is in Drive, mount Drive in a notebook cell first."
         )
+    # Expose the zip path so data_loader.py can find it without touching its signature.
+    os.environ["COLAB_MP3_ZIP_PATH"] = COLAB_MP3_ZIP_PATH
 except ImportError:
     pass  # Local execution — no Colab bootstrap needed.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -112,7 +127,16 @@ def main():
 
 
     mgr.setup_environment()
-    
+
+    # Override model checkpoint with a local path when available in Colab.
+    # This bypasses the HF Hub download entirely (wget is used instead).
+    try:
+        import google.colab  # type: ignore
+        if COLAB_MODEL_PATH and os.path.isdir(COLAB_MODEL_PATH):
+            mgr.config.model_ckpt = COLAB_MODEL_PATH
+            print(f"[INFO] Colab: loading model from local path '{COLAB_MODEL_PATH}'.")
+    except ImportError:
+        pass
 
     # 1. LOADING DATASET & MODEL
     # =========================================================================

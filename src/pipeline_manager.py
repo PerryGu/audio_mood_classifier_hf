@@ -109,10 +109,8 @@ class PipelineManager:
             )
             print("[INFO] Colab: packages ready.")
 
-            # userdata.get() requires an IPython kernel and crashes when called
-            # from a script (!python main.py).  Colab Secrets with "Notebook access"
-            # enabled are exposed directly as environment variables, so os.getenv()
-            # works from any execution context — notebook cell or script alike.
+            # Colab Secrets with "Notebook access" ON are injected into the process
+            # environment, so os.getenv() works from a script (!python main.py).
             self.hf_token = os.getenv("HF_TOKEN")
             print("[INFO] Google Colab environment detected.")
 
@@ -121,6 +119,18 @@ class PipelineManager:
             load_dotenv()
             self.hf_token = os.getenv("HF_TOKEN")
             print("[INFO] Local environment detected.")
+
+        # Authenticate the Hugging Face Hub client globally so that every
+        # from_pretrained() / load_dataset() call in this session uses the token,
+        # even if the individual call site does not pass it explicitly.
+        if self.hf_token:
+            from huggingface_hub import login
+            login(token=self.hf_token, add_to_git_credential=False)
+            print("[INFO] Hugging Face Hub: authenticated successfully.")
+        else:
+            print("[WARN] HF_TOKEN not found — Hub access will be unauthenticated.")
+            print("       Local: add it to your .env file.")
+            print("       Colab: add it to Secrets (🔑) and enable 'Notebook access'.")
 
         return self.hf_token
 
