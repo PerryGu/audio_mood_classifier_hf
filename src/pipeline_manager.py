@@ -284,13 +284,19 @@ class PipelineManager:
                 shutil.rmtree(cache_path)
 
         # If not, proceed with feature extraction
-        print("[INFO] Preparing dataset (feature extraction)...")
-        print("[INFO] Preparing dataset with 2 parallel processes...")
-        
+        # Colab doesn't support multiprocessing in dataset.map() — use 1 process there.
+        try:
+            import google.colab  # type: ignore
+            _num_proc = 1
+        except ImportError:
+            _num_proc = 2
+
+        print(f"[INFO] Preparing dataset (feature extraction, {_num_proc} process(es))...")
+
         self.dataset = self.dataset.map(
             lambda x: data_processor.preprocess_audio(x, self.feature_extractor),
             batched=True,
-            num_proc=2
+            num_proc=_num_proc
         )
         
         # Save to disk so we can load it next time
