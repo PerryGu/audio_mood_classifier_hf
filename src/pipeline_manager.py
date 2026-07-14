@@ -291,11 +291,16 @@ class PipelineManager:
         except ImportError:
             _num_proc = 2
 
-        print(f"[INFO] Preparing dataset (feature extractionX, {_num_proc} process(es))...")
+        # Colab: small batches to avoid deserializing hundreds of large audio
+        # arrays at once (~160K floats each) which stalls progress at 0%.
+        _batch_size = 16 if _num_proc == 1 else 100
+
+        print(f"[INFO] Preparing dataset (feature extraction, {_num_proc} process(es), batch {_batch_size})...")
 
         self.dataset = self.dataset.map(
             lambda x: data_processor.preprocess_audio(x, self.feature_extractor),
             batched=True,
+            batch_size=_batch_size,
             num_proc=_num_proc
         )
         
