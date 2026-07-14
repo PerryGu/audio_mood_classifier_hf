@@ -150,7 +150,7 @@ COLAB_PROJECT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf"
 
 **4. Add your Hugging Face token to Colab Secrets**
 
-In the Colab left sidebar open the **🔑 Secrets** panel and add a secret named `HF_TOKEN`. The code reads it automatically — no `.env` file needed.
+In the Colab left sidebar open the **🔑 Secrets** panel, add a secret named `HF_TOKEN`, and make sure the **Notebook access** toggle is switched **on**. With notebook access enabled, Colab exposes the secret as a regular environment variable that the script can read with `os.getenv("HF_TOKEN")` — no `.env` file needed, and no IPython kernel required.
 
 **5. Select a GPU runtime**
 

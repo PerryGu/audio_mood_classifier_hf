@@ -90,7 +90,7 @@ class PipelineManager:
           - Loads HF_TOKEN from the .env file in the project root.
         """
         try:
-            from google.colab import userdata   # type: ignore
+            import google.colab  # type: ignore  — just checks we are in Colab
 
             # Packages missing from the default Colab runtime.
             # torch, transformers, datasets, numpy, pandas, sklearn, tqdm are pre-installed.
@@ -109,7 +109,11 @@ class PipelineManager:
             )
             print("[INFO] Colab: packages ready.")
 
-            self.hf_token = userdata.get("HF_TOKEN")
+            # userdata.get() requires an IPython kernel and crashes when called
+            # from a script (!python main.py).  Colab Secrets with "Notebook access"
+            # enabled are exposed directly as environment variables, so os.getenv()
+            # works from any execution context — notebook cell or script alike.
+            self.hf_token = os.getenv("HF_TOKEN")
             print("[INFO] Google Colab environment detected.")
 
         except ImportError:
@@ -506,7 +510,7 @@ class PipelineManager:
         Evaluating on the test set.
         If checkpoint_folder is None, it uses the best model already in the trainer.
         If a path is provided it loads that specific checkpoint. The path can be:
-          - An absolute path: r'F:\...\mood_classifier_2026-07-10_19-52\checkpoint-288'
+          - An absolute path: 'F:\\...\\mood_classifier_2026-07-10_19-52\\checkpoint-288'
           - A path relative to the project root: 'mood_classifier_2026-07-10_19-52/checkpoint-288'
         """
         # If a specific checkpoint folder is requested
