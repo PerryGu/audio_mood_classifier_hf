@@ -27,7 +27,7 @@ COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
 # Run the "Download model" notebook cell to populate this directory with wget,
 # then main.py will load from disk instantly — no network download needed.
 # Set to "" to download from HF Hub as normal.
-COLAB_MODEL_PATH = "/content/ast_model"
+COLAB_MODEL_PATH = ""
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Bootstrap for Colab: sets the working directory so that all relative paths
@@ -132,7 +132,9 @@ def main():
     # This bypasses the HF Hub download entirely (wget is used instead).
     try:
         import google.colab  # type: ignore
-        if COLAB_MODEL_PATH and os.path.isdir(COLAB_MODEL_PATH):
+        safetensors_ok = os.path.isfile(os.path.join(COLAB_MODEL_PATH, "model.safetensors"))
+        pytorch_ok = os.path.isfile(os.path.join(COLAB_MODEL_PATH, "pytorch_model.bin"))
+        if COLAB_MODEL_PATH and os.path.isdir(COLAB_MODEL_PATH) and (safetensors_ok or pytorch_ok):
             mgr.config.model_ckpt = COLAB_MODEL_PATH
             print(f"[INFO] Colab: loading model from local path '{COLAB_MODEL_PATH}'.")
     except ImportError:
