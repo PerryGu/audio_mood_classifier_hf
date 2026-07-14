@@ -21,7 +21,7 @@ COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 # wrapper folder — both structures are handled automatically.
 # Mount Drive in a notebook cell before running this script:
 #     from google.colab import drive; drive.mount('/content/drive')
-COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
+COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/mp3_data.zip"
 
 # ─────────────────────────────────────────────────────────────────────────────
 
