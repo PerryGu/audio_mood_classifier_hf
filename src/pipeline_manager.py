@@ -601,6 +601,73 @@ class PipelineManager:
         return metrics
 
 
+    # =========================================================================
+    # DRIVE BACKUP: Copy outputs to Google Drive (Colab only).
+    # =========================================================================
+    def backup_to_drive(self, drive_root: str = "/content/drive/MyDrive/audio_mood_classifier_hf"):
+        """
+        Colab only: copies the timestamped model checkpoint folder and the runs
+        folder to Google Drive so they survive session termination.
+
+        drive_root should point to the project folder on Drive, e.g.:
+            /content/drive/MyDrive/audio_mood_classifier_hf
+
+        On a local machine this method returns immediately without doing anything.
+        """
+        try:
+            import google.colab  # type: ignore
+        except ImportError:
+            return  # Not in Colab — nothing to do.
+
+        import shutil
+        from pathlib import Path
+
+        drive_root = Path(drive_root)
+        if not drive_root.exists():
+            print(f"[WARN] Drive backup: root folder not found at '{drive_root}'.")
+            print("       Make sure Drive is mounted and the path is correct.")
+            return
+
+        errors = []
+
+        # 1. Backup the timestamped model/checkpoint folder
+        src_model = Path(self.config.output_dir)
+        if src_model.exists():
+            dst_model = drive_root / "models" / src_model.name
+            print(f"[INFO] Backing up checkpoints → {dst_model} ...")
+            if dst_model.exists():
+                shutil.rmtree(dst_model)
+            try:
+                shutil.copytree(src_model, dst_model)
+                size_mb = sum(f.stat().st_size for f in dst_model.rglob("*") if f.is_file()) / 1024 / 1024
+                print(f"[INFO] Checkpoints backed up ({size_mb:.0f} MB) ✓")
+            except Exception as e:
+                errors.append(f"Checkpoints: {e}")
+        else:
+            print(f"[WARN] Drive backup: model folder '{src_model}' not found — skipping.")
+
+        # 2. Backup the full runs folder (TensorBoard logs)
+        src_runs = Path(os.getcwd()) / "runs"
+        if src_runs.exists():
+            dst_runs = drive_root / "runs"
+            print(f"[INFO] Backing up runs → {dst_runs} ...")
+            if dst_runs.exists():
+                shutil.rmtree(dst_runs)
+            try:
+                shutil.copytree(src_runs, dst_runs)
+                print("[INFO] Runs backed up ✓")
+            except Exception as e:
+                errors.append(f"Runs: {e}")
+        else:
+            print("[WARN] Drive backup: runs folder not found — skipping.")
+
+        if errors:
+            print("[WARN] Some items failed to back up:")
+            for err in errors:
+                print(f"       {err}")
+        else:
+            print("[INFO] Drive backup complete.")
+
     #**************************************************************************
     # RELOAD MODULES: Refresh the underlying utility modules.
     #**************************************************************************

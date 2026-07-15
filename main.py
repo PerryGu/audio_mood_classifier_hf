@@ -215,6 +215,12 @@ def main():
             f.write(f"Results for this run: {test_results}\n")
         print(f"[SUCCESS] Results saved to {file_path}")
 
+    # 6. BACKUP TO DRIVE (Colab only)
+    # =========================================================================
+    # Copies the timestamped checkpoint folder and runs/ to Google Drive so
+    # they survive Colab session termination. No-op on a local machine.
+    mgr.backup_to_drive()
+
     # Signal that the full pipeline execution has completed successfully.
     print("[SUCCESS] Main pipeline execution finished.")
 
