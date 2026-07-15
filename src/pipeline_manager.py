@@ -541,24 +541,40 @@ class PipelineManager:
                   f"(continuing from previous sessions)")
         print(f"[INFO] Continuous log dir: {self.config.continuous_logging_dir}")
 
+        # Detect whether a GPU is available and adjust settings accordingly.
+        # adamw_torch_fused is a CUDA-only kernel — on CPU it falls back
+        # with overhead or errors.  pin_memory is pointless without a GPU.
+        _use_gpu = torch.cuda.is_available()
+        _optim = self.config.optim if _use_gpu else "adamw_torch"
+        # On CPU, drop batch size to 4 so each step is feasible in minutes,
+        # not the ~207 s/step that batch_size=32 produces.
+        _batch_size = self.config.batch_size if _use_gpu else min(self.config.batch_size, 4)
+        if not _use_gpu:
+            print(
+                f"[WARN] No GPU detected — switching to CPU-safe settings: "
+                f"optim={_optim!r}, batch_size={_batch_size} (was {self.config.batch_size}), "
+                f"pin_memory=False"
+            )
+
         # Define training arguments based on the config object
         training_args = TrainingArguments(
             output_dir=self.config.output_dir,
             learning_rate=self.config.learning_rate,
-            per_device_train_batch_size=self.config.batch_size,
+            per_device_train_batch_size=_batch_size,
             num_train_epochs=self.config.num_train_epochs,
             save_strategy=self.config.save_strategy,
             eval_strategy=self.config.eval_strategy,
             load_best_model_at_end=self.config.load_best_model_at_end,
             metric_for_best_model=self.config.metric_for_best_model,
             greater_is_better=self.config.greater_is_better,
-            optim=self.config.optim,
+            optim=_optim,
             gradient_checkpointing=self.config.gradient_checkpointing,
             report_to=self.config.report_to,
             remove_unused_columns=True,
             logging_strategy="steps",
             logging_steps=self.config.logging_steps,
             label_names=["labels"],
+            dataloader_pin_memory=_use_gpu,
         )
 
         # Initialize and return the Trainer
