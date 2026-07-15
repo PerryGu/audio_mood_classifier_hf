@@ -171,7 +171,7 @@ def main():
 
         mgr.save_training_info()
         trainer = mgr.get_trainer(train_ds=mgr.dataset['train'], eval_ds=mgr.dataset['eval'])
-        trainer.train()
+        mgr.run_training(trainer)
         mgr.save_session_steps(trainer)
 
 

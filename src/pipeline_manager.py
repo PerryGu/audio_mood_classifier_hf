@@ -581,6 +581,32 @@ class PipelineManager:
             "gain_over_random":  round(gain_pp, 2),                  # e.g. +11.97 (pp above random)
         }
 
+    def run_training(self, trainer) -> None:
+        """
+        Runs trainer.train() while suppressing the verbose 'missing keys' warning
+        that transformers emits when load_best_model_at_end reloads the best
+        checkpoint. That message is a known harmless key-naming artefact — the
+        classifier weights load correctly — but it floods the terminal with
+        hundreds of layer names.
+
+        All other output (loss, eval metrics, progress bars, real warnings) is
+        preserved exactly as before.
+        """
+        import logging
+
+        class _SuppressMissingKeys(logging.Filter):
+            def filter(self, record):
+                msg = record.getMessage().lower()
+                return "missing keys" not in msg and "unexpected keys" not in msg
+
+        hf_logger = logging.getLogger("transformers.modeling_utils")
+        _filter = _SuppressMissingKeys()
+        hf_logger.addFilter(_filter)
+        try:
+            trainer.train()
+        finally:
+            hf_logger.removeFilter(_filter)
+
     def get_trainer(self, train_ds, eval_ds=None):
         """
         Initializes and returns the Hugging Face Trainer with the specified

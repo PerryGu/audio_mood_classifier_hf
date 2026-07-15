@@ -11,8 +11,8 @@ class TrainingConfig:
     num_labels: int = 3
 
     # --- Training Hyperparameters ---
-    learning_rate: float = 1e-5
-    num_train_epochs: int = 16
+    learning_rate: float = 2e-6 #1e-5
+    num_train_epochs: int = 8
     logging_steps: int = 50
 
     # --- Strategy Configuration ---
@@ -45,6 +45,13 @@ class TrainingConfig:
     # Steps completed in previous sessions of the same lineage (set automatically).
     step_offset: int = 0
 
+    # --- Checkpoint Resumption ---
+    # Leave both empty for a clean new run (the default).
+    # Fill both to load weights from a previous checkpoint before training.
+    # A fresh timestamped output folder is always created regardless.
+    parent_run_folder: str = "mood_classifier_2026-07-15_14-39"      # e.g. "mood_classifier_2026-07-12_20-20"
+    resume_checkpoint_name: str = "checkpoint-496" # e.g. "checkpoint-248"
+
     # --- Run Folder ---
     # A fresh timestamped folder is ALWAYS created for each training session.
     # Set RESUME_RUN_FOLDER / RESUME_CKPT_NAME in main.py only to load weights —
@@ -74,9 +81,6 @@ class TrainingConfig:
     # Leave both empty for a clean new run (the default).
     # Fill both to load weights from a previous checkpoint before training.
     # A fresh timestamped output folder is always created regardless.
-    parent_run_folder: str = "mood_classifier_2026-07-15_12-24"      # e.g. "mood_classifier_2026-07-12_20-20"
-    resume_checkpoint_name: str = "checkpoint-620" # e.g. "checkpoint-248"
-
     @property
     def checkpoint_to_load(self) -> str:
         """Full path to the checkpoint to load weights from. Empty if starting fresh."""
