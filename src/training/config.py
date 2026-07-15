@@ -21,11 +21,26 @@ class TrainingConfig:
     load_best_model_at_end: bool = True
     metric_for_best_model: str = "loss"
     greater_is_better: bool = False
+    # Maximum number of checkpoints to keep on disk at any time.
+    # The Trainer always preserves the best checkpoint (tracked via
+    # trainer_state.json) and fills remaining slots with the most recent
+    # saves, deleting the rest.  2 = keep best + latest.
+    save_total_limit: int = 3
 
     # --- Infrastructure Configuration ---
     gradient_checkpointing: bool = False
     optim: str = "adamw_torch_fused"
     report_to: str = "tensorboard"
+
+    # --- Run Behaviour ---
+    # Set debug=True to run integrity checks (inspect samples, leakage tests, etc.).
+    debug: bool = False
+    # Execution mode: "train" runs training only, "test" runs evaluation only,
+    # "both" (default) runs training then evaluates on the test set.
+    mode: str = "both" #"train" / "test" / "both"
+
+    # --- WandB ---
+    wandb_project: str = "audio-mood-classifier"
 
     # Steps completed in previous sessions of the same lineage (set automatically).
     step_offset: int = 0

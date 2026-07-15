@@ -68,54 +68,38 @@ def main():
     print("Starting the main function")
     # 0. SETUP & CONFIGURATION
     # =========================================================================
-    # Set this to True if you want to run integrity checks, 
-    # or False for a clean, fast training run.
-    # Setup argument parser
+    # All hyperparameters and run-behaviour flags live in src/training/config.py.
+    # Edit them there.  The CLI args below are optional one-shot overrides that
+    # take precedence over the config values without requiring a file edit.
     parser = argparse.ArgumentParser(description="Run the ML Pipeline")
-    parser.add_argument("--debug", action="store_true", help="Run with integrity checks")
-
-    # Selecting execution mode: 'train', 'test', or 'both' (default is 'both')
-    parser.add_argument("--mode", choices=['train', 'test', 'both'], default='both', 
-                        help="Choose execution mode: 'train' only, 'test' only, or 'both'.")
-
+    parser.add_argument(
+        "--debug", action="store_true",
+        help="Run integrity checks (overrides config.debug).",
+    )
+    parser.add_argument(
+        "--mode", choices=["train", "test", "both"], default=None,
+        help="Execution mode — overrides config.mode when provided.",
+    )
     args = parser.parse_args()
 
-    # Configure the environment variables (like HF_TOKEN).
-    # This step ensures the manager has the necessary credentials to access
-    # private or gated datasets from Hugging Face.
-
-    # === TRAINING HYPERPARAMETERS ===
-    BASE_LEARNING_RATE = 1e-5
-    BATCH_SIZE = 32
-    NUM_TRAIN_EPOCHS = 20
-    # adamw_torch_fused is CUDA-only; fall back to standard AdamW on CPU.
-    import torch as _torch
-    OPTIMIZER_NAME = "adamw_torch_fused" if _torch.cuda.is_available() else "adamw_torch"
-    LOGGING_STEPS = 50
-    REPORT_TO = "tensorboard"           # "tensorboard" | "wandb" | "all"
-    WANDB_PROJECT = "audio-mood-classifier"
-
     # --- Checkpoint Resumption ---
-    # Leave both empty for a clean new run.
-    # Fill both to resume weights from a previous checkpoint.
-    # A fresh timestamped output folder is ALWAYS created regardless.
+    # Leave both empty to start a clean new run (the default).
+    # Fill both to load weights from an existing checkpoint.
+    # A fresh timestamped output folder is always created regardless.
     RESUME_RUN_FOLDER = ""  # e.g. "mood_classifier_2026-07-12_20-20"
-    RESUME_CKPT_NAME  = ""   # e.g. "checkpoint-248"
-
-    # Update the config object
-    mgr.config.learning_rate = BASE_LEARNING_RATE
-    mgr.config.batch_size = BATCH_SIZE
-    mgr.config.num_train_epochs = NUM_TRAIN_EPOCHS
-    mgr.config.optim = OPTIMIZER_NAME
-    mgr.config.report_to = REPORT_TO
-    mgr.config.logging_steps = LOGGING_STEPS
-    mgr.config.parent_run_folder = RESUME_RUN_FOLDER
+    RESUME_CKPT_NAME  = ""  # e.g. "checkpoint-248"
+    mgr.config.parent_run_folder      = RESUME_RUN_FOLDER
     mgr.config.resume_checkpoint_name = RESUME_CKPT_NAME
 
-    os.environ["WANDB_PROJECT"] = WANDB_PROJECT
+    # CLI overrides: if a flag was explicitly passed on the command line it wins;
+    # otherwise the value from config.py is used.
+    debug = args.debug or mgr.config.debug
+    mode  = args.mode if args.mode is not None else mgr.config.mode
+
+    os.environ["WANDB_PROJECT"]  = mgr.config.wandb_project
     os.environ["WANDB_RUN_NAME"] = mgr.config.session_name
 
-    print(f"[INFO] Execution Mode : {args.mode.upper()}")
+    print(f"[INFO] Execution Mode : {mode.upper()}")
     print(f"[INFO] Output folder  : {mgr.config.output_dir}")
     print(f"[INFO] Session name   : {mgr.config.session_name}")
     print(f"[INFO] TensorBoard    : {mgr.config.logging_dir}")
@@ -124,7 +108,7 @@ def main():
         print(f"[INFO] Resuming weights from: {mgr.config.checkpoint_to_load}")
     else:
         print("[INFO] Starting a new training run from scratch.")
-    print(f"[INFO] LR: {BASE_LEARNING_RATE}  |  Batch: {BATCH_SIZE}  |  Epochs: {NUM_TRAIN_EPOCHS}")
+    print(f"[INFO] LR: {mgr.config.learning_rate}  |  Batch: {mgr.config.batch_size}  |  Epochs: {mgr.config.num_train_epochs}")
     print()
 
 
@@ -157,8 +141,7 @@ def main():
 
     # 3. Optional Integrity Tests (Run only in DEBUG_MODE)
     # =========================================================================
-     # Use the argument from the terminal, default to False
-    if args.debug:
+    if debug:
         print("[DEBUG_MODE] Running integrity checks...")
         # Perform an integrity test on the loaded dataset.
         mgr.inspect_dataset_samples(num_samples=6)
@@ -177,7 +160,7 @@ def main():
     # 'audio' and 'song_id', keeping only 'input_values' and 'labels'.
     # Get the checkpoint path from the command line
 
-    if args.mode in ['train', 'both']:
+    if mode in ['train', 'both']:
         # Load only model weights via from_pretrained (safetensors, no torch.load).
         # The optimizer always starts fresh — safe on PyTorch < 2.6.
         if mgr.config.checkpoint_to_load:
@@ -191,14 +174,14 @@ def main():
 
     # 5. EVALUATE ON TEST
     # =========================================================================
-    if args.mode in ['test', 'both']:
+    if mode in ['test', 'both']:
         print("[INFO] Running evaluation on test set...")
 
         # After training: evaluate the best in-memory model (load_best_model_at_end).
         # Test-only mode: load from the specified checkpoint if provided.
         eval_checkpoint = (
             mgr.config.checkpoint_to_load
-            if args.mode == 'test' and mgr.config.checkpoint_to_load
+            if mode == 'test' and mgr.config.checkpoint_to_load
             else None
         )
         test_results = mgr.evaluate_on_test(checkpoint_folder=eval_checkpoint)

@@ -212,6 +212,8 @@ class PipelineManager:
             pass  # Not in Colab
 
         # Case 3 — download from HF Hub (model_ckpt already set to HF repo ID)
+        # _hf_hub_download is set so run_model_loading() knows to cache it afterwards.
+        self._hf_hub_download = str(local_dir)
         print(f"[INFO] Loading pre-trained model from HuggingFace Hub ({self.config.model_ckpt}).")
 
     def run_model_loading(self):
@@ -220,7 +222,11 @@ class PipelineManager:
         Resolves the model source (local folder, Drive copy, or HF Hub),
         then loads the AST model and feature extractor.
         Automatically detects if CUDA (GPU) is available for optimal performance.
+
+        When the model is downloaded from HF Hub for the first time it is saved
+        to models/ast_pretrained/ so subsequent runs load it locally (Case 1).
         """
+        self._hf_hub_download = None  # reset flag
         self._ensure_pretrained_model()
 
         print("[INFO] Loading model components...")
@@ -233,6 +239,18 @@ class PipelineManager:
             device=self.device,
             num_labels=self.config.num_labels
         )
+
+        # If the model was just downloaded from HF Hub, persist it to
+        # models/ast_pretrained/ so future runs skip the download entirely.
+        if self._hf_hub_download:
+            save_dir = self._hf_hub_download
+            print(f"[INFO] Saving pre-trained model to '{save_dir}' for future runs...")
+            import os as _os
+            _os.makedirs(save_dir, exist_ok=True)
+            self.feature_extractor.save_pretrained(save_dir)
+            self.model.save_pretrained(save_dir)
+            print(f"[INFO] Pre-trained model cached locally ✓")
+            self._hf_hub_download = None
 
         # Apply layer freezing
         self.setup_model_for_training()
@@ -567,6 +585,7 @@ class PipelineManager:
             load_best_model_at_end=self.config.load_best_model_at_end,
             metric_for_best_model=self.config.metric_for_best_model,
             greater_is_better=self.config.greater_is_better,
+            save_total_limit=self.config.save_total_limit,
             optim=_optim,
             gradient_checkpointing=self.config.gradient_checkpointing,
             report_to=self.config.report_to,
