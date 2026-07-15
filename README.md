@@ -212,7 +212,7 @@ else:
 
 ```python
 from google.colab import userdata
-import os, shutil
+import os
 from huggingface_hub import login
 
 token = userdata.get("HF_TOKEN")
@@ -220,20 +220,6 @@ os.environ["HF_TOKEN"] = token
 login(token=token, add_to_git_credential=False)
 print("Authenticated ✓")
 
-# ── Choose your model source ──────────────────────────────────────────────────
-MODEL_SOURCE     = "drive"   # "drive" → load from Google Drive  |  "hub" → download from HF
-DRIVE_MODEL_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/ast_pretrained"
-# ─────────────────────────────────────────────────────────────────────────────
-
-PROJECT_MODEL_PATH = "/content/audio_mood_classifier_hf/models/ast_pretrained"
-
-if MODEL_SOURCE == "drive":
-    os.system(f"rm -rf {PROJECT_MODEL_PATH}")
-    shutil.copytree(DRIVE_MODEL_PATH, PROJECT_MODEL_PATH)
-    size = os.path.getsize(f"{PROJECT_MODEL_PATH}/model.safetensors") / 1024 / 1024
-    print(f"Model copied from Drive: {size:.1f} MB ✓")
-
-print("\nRunning pipeline...")
 !python main.py
 ```
 
@@ -241,7 +227,10 @@ When `main.py` runs it will automatically:
 - Set the working directory so all relative paths resolve correctly
 - Install any missing packages (`librosa`, `pyloudnorm`, `pydub`, `mutagen`, `python-dotenv`)
 - Read `HF_TOKEN` from the environment
-- Load the base model from `models/ast_pretrained/` if it exists (bypasses HF Hub download)
+- Resolve the base model source in this priority order:
+  1. `models/ast_pretrained/` already present locally → use it directly
+  2. Drive folder set in `COLAB_DRIVE_MODEL_PATH` (in `main.py`) has weights → copy to `models/ast_pretrained/` → use it
+  3. Neither → download from HuggingFace Hub
 - Extract MP3 data from Drive if not already present
 - Run training and evaluation
 - **Back up the checkpoint folder and `runs/` to Google Drive automatically when done**
