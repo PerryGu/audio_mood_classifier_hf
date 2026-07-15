@@ -82,15 +82,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # --- Checkpoint Resumption ---
-    # Leave both empty to start a clean new run (the default).
-    # Fill both to load weights from an existing checkpoint.
-    # A fresh timestamped output folder is always created regardless.
-    RESUME_RUN_FOLDER = ""  # e.g. "mood_classifier_2026-07-12_20-20"
-    RESUME_CKPT_NAME  = ""  # e.g. "checkpoint-248"
-    mgr.config.parent_run_folder      = RESUME_RUN_FOLDER
-    mgr.config.resume_checkpoint_name = RESUME_CKPT_NAME
-
     # CLI overrides: if a flag was explicitly passed on the command line it wins;
     # otherwise the value from config.py is used.
     debug = args.debug or mgr.config.debug
@@ -104,7 +95,7 @@ def main():
     print(f"[INFO] Session name   : {mgr.config.session_name}")
     print(f"[INFO] TensorBoard    : {mgr.config.logging_dir}")
     print(f"[INFO] Continuous log : {mgr.config.continuous_logging_dir}")
-    if RESUME_RUN_FOLDER:
+    if mgr.config.parent_run_folder:
         print(f"[INFO] Resuming weights from: {mgr.config.checkpoint_to_load}")
     else:
         print("[INFO] Starting a new training run from scratch.")
