@@ -53,7 +53,16 @@ audio_mood_classifier_hf/
 │   ├── songs_catalog.md             # Hand-curated track list by category
 │   └── catalog_with_paths.md        # Auto-generated: catalog + matched file paths
 │
-├── models/                          # Training checkpoints (auto-created per session)
+├── models/
+│   ├── ast_pretrained/              # Base pre-trained AST model files (not committed to git)
+│   │   ├── config.json
+│   │   ├── preprocessor_config.json
+│   │   └── model.safetensors
+│   └── mood_classifier_<timestamp>/ # Training checkpoints (auto-created per session)
+│       ├── checkpoint-N/
+│       ├── training_info.json
+│       └── test_performance.txt
+│
 ├── runs/                            # TensorBoard logs (auto-created per session)
 │   └── continuous/                  # Aggregated multi-session logs for one curve
 │
@@ -70,6 +79,19 @@ audio_mood_classifier_hf/
         ├── tests.py                 # Integrity checks, leakage detection, debug tools
         ├── get_model_params.py
         └── data_uploader.py
+```
+
+### Google Drive folder structure
+
+The Drive folder mirrors the local project structure exactly:
+
+```
+MyDrive/audio_mood_classifier_hf/
+├── models/
+│   ├── ast_pretrained/              # Base AST model files (upload once, reused every session)
+│   └── mood_classifier_<timestamp>/ # Auto-backed-up after each training run
+├── runs/                            # Auto-backed-up TensorBoard logs
+└── mp3_data.zip                     # Zipped MP3 dataset (extracted once on first run)
 ```
 
 ---
@@ -114,69 +136,115 @@ python main.py --debug
 
 ### Running in Google Colab
 
-**1. Get the project into Colab**
+The notebook has **3 cells**. Run them in order.
 
-You have two options:
+---
 
-| Option | How | `COLAB_PROJECT_PATH` to set |
-|---|---|---|
-| Upload directly | Upload the folder via *Files → Upload* or `!unzip` | `"/content/audio_mood_classifier_hf"` |
-| Keep it in Drive | Copy the folder to your Google Drive | `"/content/drive/MyDrive/audio_mood_classifier_hf"` |
+**Before you start — one-time Drive setup**
 
-The project folder must contain `data/mp3_data/` with your labeled MP3 segments. If you already have a `data/processed_dataset/` cache from a previous run, only that folder is needed — the raw `mp3_data/` can be omitted.
+Upload these files to your Google Drive under `MyDrive/audio_mood_classifier_hf/`:
 
-**2. Upload your MP3 data to Google Drive**
+| What | Where on Drive |
+|---|---|
+| `mp3_data.zip` | `MyDrive/audio_mood_classifier_hf/mp3_data.zip` |
+| Base model files (`model.safetensors`, `config.json`, `preprocessor_config.json`) | `MyDrive/audio_mood_classifier_hf/models/ast_pretrained/` |
 
-Place the `mp3_data.zip` file somewhere in your Drive, for example:
-
+The base model files are found locally at:
 ```
-My Drive/audio_mood_classifier/mp3_data.zip
+C:\Users\<you>\.cache\huggingface\hub\models--MIT--ast-finetuned-audioset-10-10-0.4593\snapshots\<hash>\
 ```
 
-The zip can contain the three category folders either directly at the root, or wrapped inside one folder — both structures are detected and handled automatically. The zip is extracted once into `data/mp3_data/` inside the project and skipped on every subsequent run.
+Also add your HF token: open the **🔑 Secrets** panel in Colab, add a secret named `HF_TOKEN`, and enable **Notebook access**.
 
-**3. Mount Google Drive** (in a notebook cell, before running the script)
+Select a **GPU runtime** before running: **Runtime → Change runtime type → T4 GPU**.
 
-`drive.mount()` requires the IPython kernel and cannot be called from a script. Run this once in a Colab cell:
+---
+
+**Cell 1 — Project setup** (clone repo, mount Drive, extract MP3 data)
 
 ```python
-from google.colab import drive
+from google.colab import userdata, drive
+import zipfile, os
+from pathlib import Path
+
+# 1. Clone the repository
+git_token = userdata.get("GIT_TOKEN")
+repo_url = f"https://{git_token}@github.com/PerryGu/audio_mood_classifier_hf.git"
+os.system("rm -rf audio_mood_classifier_hf")
+os.system(f"git clone {repo_url}")
+os.chdir("audio_mood_classifier_hf")
+
+# 2. Mount Google Drive
 drive.mount("/content/drive")
+
+# 3. Extract MP3 data if not already present
+ZIP_PATH   = "/content/drive/MyDrive/audio_mood_classifier_hf/mp3_data.zip"
+EXTRACT_TO = "data/mp3_data"
+
+if os.path.exists("data/processed_dataset") and os.listdir("data/processed_dataset"):
+    print("Processed dataset already in repo — no MP3 extraction needed.")
+else:
+    with zipfile.ZipFile(ZIP_PATH, "r") as zf:
+        top_level = {Path(n).parts[0] for n in zf.namelist() if n.strip("/")}
+        if len(top_level) == 1:
+            zf.extractall("data")
+            extracted = Path("data") / next(iter(top_level))
+            if extracted.resolve() != Path(EXTRACT_TO).resolve():
+                extracted.rename(EXTRACT_TO)
+        else:
+            os.makedirs(EXTRACT_TO, exist_ok=True)
+            zf.extractall(EXTRACT_TO)
+    mp3_count = len(list(Path(EXTRACT_TO).rglob("*.mp3")))
+    print(f"Extraction complete — {mp3_count} MP3 files ready.")
 ```
 
-**4. Set your paths**
+---
 
-Open `main.py` and update the two lines at the top of the Colab configuration block:
+**Cell 2 — Sync latest code** (run after any code update)
 
 ```python
-# Path to your project folder in Colab
-COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
-
-# Path to your mp3_data.zip in Google Drive
-COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier/mp3_data.zip"
+!git pull origin main
 ```
 
-**5. Add your Hugging Face token to Colab Secrets**
+---
 
-In the Colab left sidebar open the **🔑 Secrets** panel, add a secret named `HF_TOKEN`, and make sure the **Notebook access** toggle is switched **on**. With notebook access enabled, Colab exposes the secret as a regular environment variable that the script can read with `os.getenv("HF_TOKEN")` — no `.env` file needed, and no IPython kernel required.
-
-**6. Select a GPU runtime**
-
-Go to **Runtime → Change runtime type** and select a GPU (T4 or better). The optimizer automatically falls back to standard AdamW if no GPU is detected, but training on CPU will be extremely slow.
-
-**7. Run**
+**Cell 3 — Run the pipeline**
 
 ```python
+from google.colab import userdata
+import os, shutil
+from huggingface_hub import login
+
+token = userdata.get("HF_TOKEN")
+os.environ["HF_TOKEN"] = token
+login(token=token, add_to_git_credential=False)
+print("Authenticated ✓")
+
+# ── Choose your model source ──────────────────────────────────────────────────
+MODEL_SOURCE     = "drive"   # "drive" → load from Google Drive  |  "hub" → download from HF
+DRIVE_MODEL_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/ast_pretrained"
+# ─────────────────────────────────────────────────────────────────────────────
+
+PROJECT_MODEL_PATH = "/content/audio_mood_classifier_hf/models/ast_pretrained"
+
+if MODEL_SOURCE == "drive":
+    os.system(f"rm -rf {PROJECT_MODEL_PATH}")
+    shutil.copytree(DRIVE_MODEL_PATH, PROJECT_MODEL_PATH)
+    size = os.path.getsize(f"{PROJECT_MODEL_PATH}/model.safetensors") / 1024 / 1024
+    print(f"Model copied from Drive: {size:.1f} MB ✓")
+
+print("\nRunning pipeline...")
 !python main.py
 ```
 
-When `main.py` starts it will automatically:
-- Change the working directory to your project folder (so all relative paths resolve)
-- Install the few packages not bundled with Colab (`librosa`, `pyloudnorm`, `pydub`, `mutagen`, `python-dotenv`)
-- Read your `HF_TOKEN` from Secrets
-- Then proceed with the normal pipeline
-
-All output folders (`models/`, `runs/`) are written into your project folder and persist in Drive across sessions.
+When `main.py` runs it will automatically:
+- Set the working directory so all relative paths resolve correctly
+- Install any missing packages (`librosa`, `pyloudnorm`, `pydub`, `mutagen`, `python-dotenv`)
+- Read `HF_TOKEN` from the environment
+- Load the base model from `models/ast_pretrained/` if it exists (bypasses HF Hub download)
+- Extract MP3 data from Drive if not already present
+- Run training and evaluation
+- **Back up the checkpoint folder and `runs/` to Google Drive automatically when done**
 
 ---
 
@@ -251,8 +319,10 @@ Produces `128-bin dB-scaled Mel-spectrogram PNGs` (400×400 px, magma colormap) 
 ```
 setup_environment()         ← install missing packages (Colab) + load HF_TOKEN
 run_data_loading()          ← load MP3s with librosa → HF Dataset (cached to disk)
-run_model_loading()         ← load MIT AST + ASTFeatureExtractor (freeze base, train head)
+run_model_loading()         ← load AST from models/ast_pretrained/ or HF Hub
+                               freeze backbone, re-init 3-class head
 prepare_dataset()           ← extract input_values via ASTFeatureExtractor (cached)
+                               uses 1 process + batch_size=16 in Colab to avoid stalling
 split_dataset(test_size=0.3)← group-shuffle split: 70% train / 15% test / 15% eval
 map_labels_to_ids()         ← convert string labels → integer IDs
 [--debug]  inspect_dataset_samples()
@@ -261,6 +331,7 @@ map_labels_to_ids()         ← convert string labels → integer IDs
            trainer.train()
            save_session_steps()  → session_log.json (for continuous TensorBoard)
 [test]     evaluate_on_test()    → test_performance.txt
+           backup_to_drive()     → copy models/<run>/ and runs/ to Drive (Colab only)
 ```
 
 ### Dataset splitting strategy
@@ -309,7 +380,7 @@ tensorboard --logdir runs/continuous
 %tensorboard --logdir runs/continuous
 ```
 
-Each training session writes to its own timestamped folder under `runs/`. The `continuous/` directory accumulates logs from resumed sessions with correct global step offsets so all sessions appear as a single unbroken learning curve. In Colab, both folders live in your Drive and remain available across sessions.
+Each training session writes to its own timestamped folder under `runs/`. The `continuous/` directory accumulates logs from resumed sessions with correct global step offsets so all sessions appear as a single unbroken learning curve. In Colab, both folders are automatically backed up to Drive after each training run.
 
 ---
 
@@ -323,6 +394,17 @@ Each training session creates a folder under `models/mood_classifier_<YYYY-MM-DD
 | `training_info.json` | Run metadata (LR, epochs, resume source, timestamp) |
 | `test_performance.txt` | Final test-set evaluation metrics |
 | `test_results.json` | Same metrics in JSON format |
+
+### Google Drive backup (Colab only)
+
+After training completes, `backup_to_drive()` runs automatically and copies:
+
+| Source (Colab) | Destination (Drive) |
+|---|---|
+| `models/mood_classifier_<timestamp>/` | `MyDrive/audio_mood_classifier_hf/models/mood_classifier_<timestamp>/` |
+| `runs/` | `MyDrive/audio_mood_classifier_hf/runs/` |
+
+On a local machine this step is skipped entirely.
 
 ---
 
