@@ -9,10 +9,10 @@ import os
 import sys
 
 # ── Colab Configuration ───────────────────────────────────────────────────────
-# These are the only two lines you need to change when running in Colab.
-# Both are ignored automatically on a local machine.
+# These variables are only used when running in Google Colab.
+# They are ignored automatically on a local machine.
 
-# Path to the project folder in Colab (uploaded directly or via Drive).
+# Path to the project folder in Colab.
 COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 
 # Path to the mp3_data.zip file in Google Drive.
@@ -22,6 +22,12 @@ COLAB_PROJECT_PATH = "/content/audio_mood_classifier_hf"
 # Mount Drive in a notebook cell before running this script:
 #     from google.colab import drive; drive.mount('/content/drive')
 COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/mp3_data.zip"
+
+# Path to the base pre-trained AST model folder on Google Drive.
+# If this folder exists and contains model.safetensors, it is copied into
+# models/ast_pretrained/ at the start of model loading — no HF Hub download needed.
+# Set to "" to always load from HF Hub.
+COLAB_DRIVE_MODEL_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/ast_pretrained"
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -42,8 +48,10 @@ try:
             f"       Update COLAB_PROJECT_PATH at the top of main.py and re-run.\n"
             f"       If the project is in Drive, mount Drive in a notebook cell first."
         )
-    # Expose the zip path so data_loader.py can find it without touching its signature.
-    os.environ["COLAB_MP3_ZIP_PATH"] = COLAB_MP3_ZIP_PATH
+    # Expose paths as environment variables so pipeline_manager.py and
+    # data_loader.py can read them without changing their signatures.
+    os.environ["COLAB_MP3_ZIP_PATH"]      = COLAB_MP3_ZIP_PATH
+    os.environ["COLAB_DRIVE_MODEL_PATH"]  = COLAB_DRIVE_MODEL_PATH
 except ImportError:
     pass  # Local execution — no Colab bootstrap needed.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -122,20 +130,6 @@ def main():
 
 
     mgr.setup_environment()
-
-    # If the pre-trained base model has been saved locally (inside the project at
-    # models/ast_pretrained/), load it from disk — no network download needed.
-    # This works identically on a local machine and in Colab.
-    # To use it: copy model.safetensors + config.json + preprocessor_config.json
-    # into ./models/ast_pretrained/ and the pipeline will pick them up automatically.
-    _local_model = os.path.join(os.getcwd(), "models", "ast_pretrained")
-    _st_ok = os.path.isfile(os.path.join(_local_model, "model.safetensors"))
-    _pt_ok = os.path.isfile(os.path.join(_local_model, "pytorch_model.bin"))
-    if os.path.isdir(_local_model) and (_st_ok or _pt_ok):
-        mgr.config.model_ckpt = _local_model
-        print(f"[INFO] Loading pre-trained model from project folder '{_local_model}'.")
-    else:
-        print("[INFO] Loading pre-trained model from HuggingFace Hub.")
 
     # 1. LOADING DATASET & MODEL
     # =========================================================================

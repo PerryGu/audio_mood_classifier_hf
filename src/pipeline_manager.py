@@ -166,11 +166,63 @@ class PipelineManager:
 
 
         
+    def _ensure_pretrained_model(self) -> None:
+        """
+        Resolves the source for the base pre-trained AST model and updates
+        self.config.model_ckpt accordingly. Priority order:
+
+          1. models/ast_pretrained/ already exists with model weights
+             → use it directly (fastest, works locally and in Colab).
+          2. In Colab and COLAB_DRIVE_MODEL_PATH points to a valid Drive folder
+             → copy files into models/ast_pretrained/ then use that path.
+          3. Fall through to HF Hub (self.config.model_ckpt unchanged).
+        """
+        import shutil
+        from pathlib import Path
+
+        local_dir = Path(os.getcwd()) / "models" / "ast_pretrained"
+
+        def _has_weights(p: Path) -> bool:
+            return (p / "model.safetensors").exists() or (p / "pytorch_model.bin").exists()
+
+        # Case 1 — already present locally
+        if local_dir.is_dir() and _has_weights(local_dir):
+            self.config.model_ckpt = str(local_dir)
+            print(f"[INFO] Pre-trained model found in project folder — loading from '{local_dir}'.")
+            return
+
+        # Case 2 — Colab: copy from Drive
+        try:
+            import google.colab  # type: ignore
+            drive_path_str = os.environ.get("COLAB_DRIVE_MODEL_PATH", "")
+            drive_path = Path(drive_path_str) if drive_path_str else None
+
+            if drive_path and drive_path.is_dir() and _has_weights(drive_path):
+                print(f"[INFO] Copying pre-trained model from Drive → '{local_dir}' ...")
+                if local_dir.exists():
+                    shutil.rmtree(local_dir)
+                shutil.copytree(drive_path, local_dir)
+                size_mb = (local_dir / "model.safetensors").stat().st_size / 1024 / 1024
+                print(f"[INFO] Model copied from Drive ({size_mb:.0f} MB) ✓")
+                self.config.model_ckpt = str(local_dir)
+                return
+            else:
+                print("[INFO] Drive model path not found or incomplete — will download from HF Hub.")
+        except ImportError:
+            pass  # Not in Colab
+
+        # Case 3 — download from HF Hub (model_ckpt already set to HF repo ID)
+        print(f"[INFO] Loading pre-trained model from HuggingFace Hub ({self.config.model_ckpt}).")
+
     def run_model_loading(self):
         """
         Initializes the model and feature extractor.
+        Resolves the model source (local folder, Drive copy, or HF Hub),
+        then loads the AST model and feature extractor.
         Automatically detects if CUDA (GPU) is available for optimal performance.
         """
+        self._ensure_pretrained_model()
+
         print("[INFO] Loading model components...")
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
