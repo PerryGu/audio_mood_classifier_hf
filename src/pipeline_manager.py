@@ -216,6 +216,55 @@ class PipelineManager:
         self._hf_hub_download = str(local_dir)
         print(f"[INFO] Loading pre-trained model from HuggingFace Hub ({self.config.model_ckpt}).")
 
+    def _ensure_resume_checkpoint(self) -> None:
+        """
+        Colab only: if the checkpoint configured in config.py does not exist in
+        the local models/ folder but COLAB_DRIVE_CHECKPOINT_PATH is set and
+        points to a valid Drive folder, copies it to the expected local path so
+        that load_model_from_checkpoint() can proceed normally.
+
+        On a local machine, or when no resumption is configured, this is a no-op.
+        The caller (main.py) is responsible for checking config.checkpoint_to_load
+        before calling this method.
+        """
+        import shutil
+        from pathlib import Path
+
+        checkpoint_path = Path(self.config.checkpoint_to_load)
+
+        if checkpoint_path.exists():
+            print(f"[INFO] Resume checkpoint found locally — '{checkpoint_path}'.")
+            return
+
+        # Not found locally — try copying from Drive (Colab only).
+        try:
+            import google.colab  # type: ignore
+        except ImportError:
+            return  # Local machine — let load_model_from_checkpoint raise the error.
+
+        drive_path_str = os.environ.get("COLAB_DRIVE_CHECKPOINT_PATH", "").strip()
+        if not drive_path_str:
+            print(
+                "[WARN] Resume checkpoint not found locally and "
+                "COLAB_DRIVE_CHECKPOINT_PATH is not set in main.py.\n"
+                "       Set it to the full Drive path of the checkpoint folder."
+            )
+            return
+
+        drive_path = Path(drive_path_str)
+        if not drive_path.exists():
+            print(f"[WARN] Drive checkpoint path not found: '{drive_path}'.")
+            print("       Make sure Drive is mounted and the path is correct.")
+            return
+
+        print(f"[INFO] Copying checkpoint from Drive → '{checkpoint_path}' ...")
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(drive_path, checkpoint_path)
+        size_mb = sum(
+            f.stat().st_size for f in checkpoint_path.rglob("*") if f.is_file()
+        ) / 1024 / 1024
+        print(f"[INFO] Checkpoint copied from Drive ({size_mb:.0f} MB) ✓")
+
     def run_model_loading(self):
         """
         Initializes the model and feature extractor.

@@ -12,7 +12,7 @@ class TrainingConfig:
 
     # --- Training Hyperparameters ---
     learning_rate: float = 1e-5
-    num_train_epochs: int = 5
+    num_train_epochs: int = 16
     logging_steps: int = 50
 
     # --- Strategy Configuration ---
@@ -71,10 +71,11 @@ class TrainingConfig:
         return os.path.abspath(os.path.join(os.getcwd(), "runs", self.session_name))
 
     # --- Checkpoint Resumption ---
-    # Set these in main.py to resume weights from a previous run.
-    # The new session still saves its checkpoints to a fresh output_dir.
-    parent_run_folder: str = ""      # e.g. "mood_classifier_2026-07-12_20-20"
-    resume_checkpoint_name: str = "" # e.g. "checkpoint-248"
+    # Leave both empty for a clean new run (the default).
+    # Fill both to load weights from a previous checkpoint before training.
+    # A fresh timestamped output folder is always created regardless.
+    parent_run_folder: str = "mood_classifier_2026-07-15_12-24"      # e.g. "mood_classifier_2026-07-12_20-20"
+    resume_checkpoint_name: str = "checkpoint-620" # e.g. "checkpoint-248"
 
     @property
     def checkpoint_to_load(self) -> str:

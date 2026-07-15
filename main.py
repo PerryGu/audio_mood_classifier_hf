@@ -29,6 +29,14 @@ COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/mp3_data.z
 # Set to "" to always load from HF Hub.
 COLAB_DRIVE_MODEL_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/ast_pretrained"
 
+# Full Drive path to the checkpoint folder to resume training from.
+# If set and the checkpoint is not already in the local models/ folder,
+# it is copied from Drive automatically before training starts.
+# Must match config.parent_run_folder / config.resume_checkpoint_name.
+# Example: "/content/drive/MyDrive/audio_mood_classifier_hf/models/mood_classifier_2026-07-15_12-24/checkpoint-620"
+# Set to "" to start a clean new run (no resumption from Drive).
+COLAB_DRIVE_CHECKPOINT_PATH = ""
+
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Bootstrap for Colab: sets the working directory so that all relative paths
@@ -50,8 +58,9 @@ try:
         )
     # Expose paths as environment variables so pipeline_manager.py and
     # data_loader.py can read them without changing their signatures.
-    os.environ["COLAB_MP3_ZIP_PATH"]      = COLAB_MP3_ZIP_PATH
-    os.environ["COLAB_DRIVE_MODEL_PATH"]  = COLAB_DRIVE_MODEL_PATH
+    os.environ["COLAB_MP3_ZIP_PATH"]           = COLAB_MP3_ZIP_PATH
+    os.environ["COLAB_DRIVE_MODEL_PATH"]       = COLAB_DRIVE_MODEL_PATH
+    os.environ["COLAB_DRIVE_CHECKPOINT_PATH"]  = COLAB_DRIVE_CHECKPOINT_PATH
 except ImportError:
     pass  # Local execution — no Colab bootstrap needed.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -154,7 +163,10 @@ def main():
     if mode in ['train', 'both']:
         # Load only model weights via from_pretrained (safetensors, no torch.load).
         # The optimizer always starts fresh — safe on PyTorch < 2.6.
+        # In Colab, _ensure_resume_checkpoint() copies the checkpoint from Drive
+        # to the local models/ folder if it isn't already there.
         if mgr.config.checkpoint_to_load:
+            mgr._ensure_resume_checkpoint()
             mgr.load_model_from_checkpoint(mgr.config.checkpoint_to_load)
 
         mgr.save_training_info()
