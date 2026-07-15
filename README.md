@@ -13,7 +13,7 @@ The goal was to go from a hand-curated list of songs all the way to a trained an
 1. A personal music library was scanned against a curated song catalog, and each matched track was sampled at **6 evenly-spaced positions** throughout the song. At every position a **10-second clip** was extracted, skipping the first and last 30 seconds of the track to avoid intros and outros. This gives 6 labeled segments per song, each capturing a different moment in the track — maximizing dataset size and variety while keeping each clip representative of the song's overall mood. Each segment also had EBU R128 loudness normalization applied to keep volume levels consistent across clips.
 2. Those segments were loaded, resampled to 16 kHz, and converted to spectrograms — 2D frequency-over-time representations of the audio — which were then fed into the model.
 
-**The model** is a fine-tuned [Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593), developed by MIT and pre-trained on AudioSet. AST applies the standard Vision Transformer architecture directly to audio spectrograms, treating each spectrogram as a "image" and processing it with self-attention across frequency and time. Starting from a model already pre-trained on a large and diverse audio dataset gives a strong foundation — the fine-tuning step only needs to teach it the mood-specific distinctions. To keep training efficient, the entire transformer backbone is frozen and only the final classification head is re-trained for the 3 mood classes.
+**The model** is a fine-tuned [Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593), developed by MIT and pre-trained on AudioSet. AST applies the standard Vision Transformer architecture directly to audio spectrograms, treating each spectrogram as an "image" and processing it with self-attention across frequency and time. Starting from a model already pre-trained on a large and diverse audio dataset gives a strong foundation — the fine-tuning step only needs to teach it the mood-specific distinctions. By default only the final classification head is re-trained for the 3 mood classes, but `num_unfrozen_layers` in `config.py` lets you progressively unfreeze the top encoder layers for deeper fine-tuning.
 
 The pipeline handles the full workflow: data generation, feature extraction, group-aware dataset splitting (ensuring all segments from the same song stay in the same split, to prevent leakage between train/test/eval), training with checkpoint resumption, and evaluation with accuracy reported relative to the random baseline.
 
@@ -149,14 +149,20 @@ Upload these files to your Google Drive under `MyDrive/audio_mood_classifier_hf/
 | `mp3_data.zip` | `MyDrive/audio_mood_classifier_hf/mp3_data.zip` |
 | Base model files (`model.safetensors`, `config.json`, `preprocessor_config.json`) | `MyDrive/audio_mood_classifier_hf/models/ast_pretrained/` |
 
-The base model files are found locally at:
-```
-C:\Users\<you>\.cache\huggingface\hub\models--MIT--ast-finetuned-audioset-10-10-0.4593\snapshots\<hash>\
-```
+> After the first successful local run, `models/ast_pretrained/` is populated automatically. You can copy it from there to Drive instead of hunting for the HF cache folder.
 
 Also add your HF token: open the **🔑 Secrets** panel in Colab, add a secret named `HF_TOKEN`, and enable **Notebook access**.
 
 Select a **GPU runtime** before running: **Runtime → Change runtime type → T4 GPU**.
+
+**Colab path variables** (top of `main.py`)
+
+| Variable | Purpose |
+|---|---|
+| `COLAB_PROJECT_PATH` | Absolute path to the cloned repo in Colab |
+| `COLAB_MP3_ZIP_PATH` | Drive path to `mp3_data.zip` |
+| `COLAB_DRIVE_MODEL_PATH` | Drive path to `models/ast_pretrained/` (copied locally on first run) |
+| `COLAB_DRIVE_CHECKPOINT_PATH` | Drive path to a specific checkpoint folder to resume from — set when continuing training from a local checkpoint; leave `""` for a fresh run |
 
 ---
 
@@ -229,37 +235,99 @@ When `main.py` runs it will automatically:
 - Read `HF_TOKEN` from the environment
 - Resolve the base model source in this priority order:
   1. `models/ast_pretrained/` already present locally → use it directly
-  2. Drive folder set in `COLAB_DRIVE_MODEL_PATH` (in `main.py`) has weights → copy to `models/ast_pretrained/` → use it
-  3. Neither → download from HuggingFace Hub
+  2. Drive folder set in `COLAB_DRIVE_MODEL_PATH` has weights → copy to `models/ast_pretrained/` → use it
+  3. Neither → download from HuggingFace Hub → save to `models/ast_pretrained/` for future runs
 - Extract MP3 data from Drive if not already present
-- Run training and evaluation
+- If resuming from a checkpoint and `COLAB_DRIVE_CHECKPOINT_PATH` is set → copy checkpoint from Drive to `models/` before training
+- Run training (with terminal noise from `load_best_model_at_end` suppressed) and evaluation
 - **Back up the checkpoint folder and `runs/` to Google Drive automatically when done**
 
 ---
 
 ## Training Configuration
 
-Hyperparameters are set at the top of `main.py` and applied to the `TrainingConfig` object:
+All hyperparameters and run-behaviour flags live in **`src/training/config.py`** — the single source of truth. Edit them there; `main.py` applies them automatically. CLI flags (`--debug`, `--mode`) override config values for one-off runs without touching the file.
 
-| Parameter | Default | Description |
+### Hyperparameters
+
+| Field | Default | Description |
 |---|---|---|
-| `BASE_LEARNING_RATE` | `1e-5` | Learning rate for AdamW |
-| `BATCH_SIZE` | `32` | Per-device training batch size |
-| `NUM_TRAIN_EPOCHS` | `8` | Total training epochs |
-| `OPTIMIZER_NAME` | `adamw_torch_fused` / `adamw_torch` | Fused AdamW on GPU, standard AdamW on CPU (auto-detected) |
-| `LOGGING_STEPS` | `50` | TensorBoard log frequency |
-| `REPORT_TO` | `tensorboard` | `"tensorboard"` \| `"wandb"` \| `"all"` |
+| `learning_rate` | `1e-5` | AdamW learning rate |
+| `batch_size` | `32` | Per-device training batch size |
+| `num_train_epochs` | `5` | Total training epochs |
+| `logging_steps` | `50` | TensorBoard log frequency |
+| `optim` | `adamw_torch_fused` | Optimizer — auto-switched to `adamw_torch` on CPU |
+| `report_to` | `tensorboard` | `"tensorboard"` \| `"wandb"` \| `"all"` |
+| `wandb_project` | `audio-mood-classifier` | WandB project name |
 
-### Checkpoint Resumption
+### CPU / GPU auto-detection
 
-To resume weights from a previous run, set in `main.py`:
+`get_trainer()` detects `torch.cuda.is_available()` at runtime and automatically applies safe CPU fallbacks when no GPU is found:
 
-```python
-RESUME_RUN_FOLDER = "mood_classifier_2026-07-13_13-22"  # folder under models/
-RESUME_CKPT_NAME  = "checkpoint-62"                      # checkpoint inside that folder
+| Setting | GPU | CPU (auto) |
+|---|---|---|
+| `optim` | `adamw_torch_fused` | `adamw_torch` |
+| `batch_size` | `config.batch_size` (32) | `min(config.batch_size, 4)` |
+| `dataloader_pin_memory` | `True` | `False` |
+
+### Layer freezing
+
+Controlled by `num_unfrozen_layers` in `config.py`. The classifier head is always trainable; this setting additionally unfreezes encoder layers counting from the top (output) end of the 12-layer transformer.
+
+| `num_unfrozen_layers` | Trainable scope | Approx params | Recommended LR |
+|---|---|---|---|
+| `0` | Classifier head only *(default)* | ~3 K | `1e-5` |
+| `1` | Layer 11 + layernorm + head | ~7 M | `2e-6` |
+| `2` | Layers 10–11 + layernorm + head | ~14 M | `1e-6` |
+| `4` | Layers 8–11 + layernorm + head | ~28 M | `5e-7` |
+| `12` | All encoder layers + head | ~87 M | `1e-7` |
+
+> When unfreezing layers on top of a checkpoint, always lower `learning_rate` significantly — too high a value will destroy the pre-trained representations rather than adapting them.
+
+### Run behaviour
+
+| Field | Default | Description |
+|---|---|---|
+| `mode` | `"both"` | `"train"` / `"test"` / `"both"` — overridable with `--mode` |
+| `debug` | `False` | Enable integrity checks — overridable with `--debug` |
+
+### Checkpoint management
+
+| Field | Default | Description |
+|---|---|---|
+| `save_total_limit` | `2` | Max checkpoints kept on disk at any time |
+| `load_best_model_at_end` | `True` | Reload best checkpoint into memory after training |
+| `metric_for_best_model` | `"loss"` | Metric used to rank checkpoints |
+
+With `save_total_limit=2` the Trainer always preserves the **best** checkpoint (tracked in `trainer_state.json` → `best_model_checkpoint`) and fills the remaining slot with the most recent save; older non-best checkpoints are deleted automatically.
+
+To find the best checkpoint after a run, read `models/<run>/checkpoint-N/trainer_state.json`:
+
+```json
+{
+  "best_model_checkpoint": ".../checkpoint-496",
+  "best_metric": 0.7278
+}
 ```
 
-A **new timestamped output folder** is always created regardless of whether weights are resumed. The optimizer always restarts fresh.
+### Checkpoint resumption
+
+Set these fields in `config.py` to load weights from a previous checkpoint before starting a new training session. A **new timestamped output folder** is always created; the optimizer restarts fresh.
+
+```python
+# src/training/config.py
+parent_run_folder      = "mood_classifier_2026-07-15_14-39"  # folder under models/
+resume_checkpoint_name = "checkpoint-496"                     # checkpoint inside that folder
+```
+
+In **Colab**, also set `COLAB_DRIVE_CHECKPOINT_PATH` at the top of `main.py` to the full Drive path of the checkpoint folder. The pipeline will copy it to the local `models/` folder automatically before training starts:
+
+```python
+# main.py  (Colab config section)
+COLAB_DRIVE_CHECKPOINT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/mood_classifier_2026-07-15_14-39/checkpoint-496"
+```
+
+Leave it as `""` for a clean new run (no resumption from Drive).
 
 ---
 
@@ -306,21 +374,25 @@ Produces `128-bin dB-scaled Mel-spectrogram PNGs` (400×400 px, magma colormap) 
 `main.py` drives a single `PipelineManager` instance through these ordered stages:
 
 ```
-setup_environment()         ← install missing packages (Colab) + load HF_TOKEN
-run_data_loading()          ← load MP3s with librosa → HF Dataset (cached to disk)
-run_model_loading()         ← load AST from models/ast_pretrained/ or HF Hub
-                               freeze backbone, re-init 3-class head
-prepare_dataset()           ← extract input_values via ASTFeatureExtractor (cached)
-                               uses 1 process + batch_size=16 in Colab to avoid stalling
-split_dataset(test_size=0.3)← group-shuffle split: 70% train / 15% test / 15% eval
-map_labels_to_ids()         ← convert string labels → integer IDs
+setup_environment()              ← install missing packages (Colab) + load HF_TOKEN
+run_data_loading()               ← load MP3s with librosa → HF Dataset (cached to disk)
+run_model_loading()              ← resolve model source (priority order below), load AST,
+                                    freeze/unfreeze layers per num_unfrozen_layers,
+                                    re-init classification head for num_labels classes;
+                                    if downloaded from HF Hub → save to models/ast_pretrained/
+                                    so future runs load locally without re-downloading
+prepare_dataset()                ← extract input_values via ASTFeatureExtractor (cached)
+                                    uses 1 process + batch_size=16 in Colab to avoid stalling
+split_dataset(test_size=0.3)    ← group-shuffle split: 70% train / 15% test / 15% eval
+map_labels_to_ids()              ← convert string labels → integer IDs
 [--debug]  inspect_dataset_samples()
-[train]    load_model_from_checkpoint() if resuming
-           save_training_info()  → training_info.json
-           trainer.train()
-           save_session_steps()  → session_log.json (for continuous TensorBoard)
-[test]     evaluate_on_test()    → test_performance.txt
-           backup_to_drive()     → copy models/<run>/ and runs/ to Drive (Colab only)
+[train]    _ensure_resume_checkpoint()    if resuming (copies from Drive in Colab)
+           load_model_from_checkpoint()   if resuming (loads weights, re-applies freeze)
+           save_training_info()           → training_info.json
+           run_training(trainer)          → trainer.train() with terminal noise suppressed
+           save_session_steps()           → session_log.json (for continuous TensorBoard)
+[test]     evaluate_on_test()            → test_performance.txt
+           backup_to_drive()             → copy models/<run>/ and runs/ to Drive (Colab only)
 ```
 
 ### Dataset splitting strategy
@@ -329,10 +401,11 @@ Splitting is performed with `GroupShuffleSplit` (scikit-learn), grouping by **so
 
 ### Model architecture
 
-- **Base model:** `MIT/ast-finetuned-audioset-10-10-0.4593` (Audio Spectrogram Transformer)
-- **Classification head:** re-initialized for `num_labels=3`, trained from scratch
-- **Frozen layers:** All transformer backbone layers (`classifier` excluded)
+- **Base model:** `MIT/ast-finetuned-audioset-10-10-0.4593` (Audio Spectrogram Transformer, 12 encoder layers)
+- **Classification head:** re-initialized for `num_labels=3`, always trainable
+- **Frozen layers:** controlled by `num_unfrozen_layers` in `config.py` (default `0` = full backbone frozen, only head trains; set higher to unfreeze top encoder layers for deeper fine-tuning)
 - **Input:** 16 kHz mono audio → `ASTFeatureExtractor` → 2D spectrogram (`input_values`)
+- **Model source priority:** `models/ast_pretrained/` (local) → Drive copy (Colab) → HF Hub download (cached to `models/ast_pretrained/` for future runs)
 
 ### Evaluation metrics
 
@@ -379,8 +452,10 @@ Each training session creates a folder under `models/mood_classifier_<YYYY-MM-DD
 
 | File | Description |
 |---|---|
-| `checkpoint-N/` | Model weights + config saved every epoch |
+| `checkpoint-N/` | Saved model weights + optimizer state. At most `save_total_limit` checkpoints are kept — the Trainer always preserves the best one and fills remaining slots with the most recent saves. |
+| `checkpoint-N/trainer_state.json` | Full per-epoch metric history + `best_model_checkpoint` field identifying the winning checkpoint by name. |
 | `training_info.json` | Run metadata (LR, epochs, resume source, timestamp) |
+| `all_results.json` | Combined train + eval metrics for the session |
 | `test_performance.txt` | Final test-set evaluation metrics |
 | `test_results.json` | Same metrics in JSON format |
 

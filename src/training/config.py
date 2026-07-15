@@ -27,6 +27,16 @@ class TrainingConfig:
     # saves, deleting the rest.  2 = keep best + latest.
     save_total_limit: int = 3
 
+    # --- Layer Freezing ---
+    # Number of encoder layers to unfreeze for training, counting from the top
+    # (output end) of the transformer.  The classifier head is always trainable.
+    #   0  → classifier head only         (fastest, ~3 K params)   ← current default
+    #   1  → layer 11 + layernorm + head  (~7 M params)
+    #   2  → layers 10-11 + layernorm + head
+    #   12 → all encoder layers + head    (full fine-tune, slowest)
+    # When resuming from a checkpoint, set this higher and lower the learning_rate.
+    num_unfrozen_layers: int = 0
+
     # --- Infrastructure Configuration ---
     gradient_checkpointing: bool = False
     optim: str = "adamw_torch_fused"

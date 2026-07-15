@@ -314,18 +314,61 @@ class PipelineManager:
     # =========================================================================
     def setup_model_for_training(self):
         """
-        Freezes the base model and ensures the classification head 
-        is set to the correct number of labels.
+        Selectively freezes the model based on config.num_unfrozen_layers.
+
+          0  → only the classifier head is trainable (default, fastest)
+          N  → the last N encoder layers + final layernorm + classifier head
+          12 → all encoder layers unfrozen (full fine-tuning)
+
+        Called automatically after every model load (both initial load and
+        checkpoint resume), so the freeze state is always consistent.
         """
-        # 1. Freeze base model except for the classifier
+        n = self.config.num_unfrozen_layers
+        total_layers = self.model.config.num_hidden_layers  # 12 for AST base
+
+        # Step 1: freeze everything
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+        # Step 2: selectively unfreeze
         for name, param in self.model.named_parameters():
-            if "classifier" not in name:
-                param.requires_grad = False
-        
-        # 2. Ensure the correct number of labels is set
+            # The classifier head is always trainable
+            if "classifier" in name:
+                param.requires_grad = True
+                continue
+
+            if n > 0:
+                # Unfreeze the last n encoder layers.
+                # Handles both transformers naming conventions:
+                #   new (v5): audio_spectrogram_transformer.layers.{i}.*
+                #   old:      audio_spectrogram_transformer.encoder.layer.{i}.*
+                for idx in range(total_layers - n, total_layers):
+                    if f"layers.{idx}." in name or f"layer.{idx}." in name:
+                        param.requires_grad = True
+                        break
+                # Also unfreeze the final transformer layernorm
+                if "audio_spectrogram_transformer.layernorm" in name:
+                    param.requires_grad = True
+
+        # Step 3: report what's trainable
         self.model.config.num_labels = self.config.num_labels
-        
-        print(f"[INFO] Model base frozen. Training only classifier head with {self.config.num_labels} labels.")
+        total_params    = sum(p.numel() for p in self.model.parameters())
+        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+
+        if n == 0:
+            desc   = "classifier head only"
+            detail = f"(encoder layers 0–{total_layers - 1} all frozen)"
+        elif n >= total_layers:
+            desc   = f"all {total_layers} encoder layers + layernorm + classifier head"
+            detail = "(full fine-tuning)"
+        else:
+            first = total_layers - n
+            desc   = f"encoder layers {first}–{total_layers - 1} + layernorm + classifier head"
+            detail = f"(layers 0–{first - 1} frozen)"
+
+        print(f"[INFO] Trainable: {desc} {detail}")
+        print(f"[INFO] Trainable params: {trainable_params:,} / {total_params:,} "
+              f"({100 * trainable_params / total_params:.1f}%)")
 
 
     # =========================================================================
