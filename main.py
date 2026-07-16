@@ -29,13 +29,12 @@ COLAB_MP3_ZIP_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/mp3_data.z
 # Set to "" to always load from HF Hub.
 COLAB_DRIVE_MODEL_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/ast_pretrained"
 
-# Full Drive path to the checkpoint folder to resume training from.
-# If set and the checkpoint is not already in the local models/ folder,
-# it is copied from Drive automatically before training starts.
-# Must match config.parent_run_folder / config.resume_checkpoint_name.
-# Example: "/content/drive/MyDrive/audio_mood_classifier_hf/models/mood_classifier_2026-07-15_12-24/checkpoint-620"
-# Set to "" to start a clean new run (no resumption from Drive).
-COLAB_DRIVE_CHECKPOINT_PATH = ""
+# Base Drive path to the models folder.
+# The pipeline auto-derives the checkpoint path from this base combined with
+# config.parent_run_folder and config.resume_checkpoint_name — so you never
+# need to update this variable again. Just keep config.py up to date.
+# Set to "" to disable Drive checkpoint copying entirely (fresh run or local only).
+COLAB_DRIVE_MODELS_BASE = "/content/drive/MyDrive/audio_mood_classifier_hf/models"
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -58,9 +57,9 @@ try:
         )
     # Expose paths as environment variables so pipeline_manager.py and
     # data_loader.py can read them without changing their signatures.
-    os.environ["COLAB_MP3_ZIP_PATH"]           = COLAB_MP3_ZIP_PATH
-    os.environ["COLAB_DRIVE_MODEL_PATH"]       = COLAB_DRIVE_MODEL_PATH
-    os.environ["COLAB_DRIVE_CHECKPOINT_PATH"]  = COLAB_DRIVE_CHECKPOINT_PATH
+    os.environ["COLAB_MP3_ZIP_PATH"]        = COLAB_MP3_ZIP_PATH
+    os.environ["COLAB_DRIVE_MODEL_PATH"]    = COLAB_DRIVE_MODEL_PATH
+    os.environ["COLAB_DRIVE_MODELS_BASE"]   = COLAB_DRIVE_MODELS_BASE
 except ImportError:
     pass  # Local execution — no Colab bootstrap needed.
 # ─────────────────────────────────────────────────────────────────────────────

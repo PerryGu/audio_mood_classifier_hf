@@ -165,7 +165,7 @@ Select a **GPU runtime** before running: **Runtime → Change runtime type → T
 | `COLAB_PROJECT_PATH` | Absolute path to the cloned repo in Colab |
 | `COLAB_MP3_ZIP_PATH` | Drive path to `mp3_data.zip` |
 | `COLAB_DRIVE_MODEL_PATH` | Drive path to `models/ast_pretrained/` (copied locally on first run) |
-| `COLAB_DRIVE_CHECKPOINT_PATH` | Drive path to a specific checkpoint folder to resume from — set when continuing training from a local checkpoint; leave `""` for a fresh run |
+| `COLAB_DRIVE_MODELS_BASE` | Drive path to your `models/` folder — set once and never touch again; the checkpoint path is auto-derived from this base + `config.parent_run_folder` + `config.resume_checkpoint_name` |
 
 ---
 
@@ -359,14 +359,22 @@ parent_run_folder      = "mood_classifier_2026-07-15_14-39"  # folder under mode
 resume_checkpoint_name = "checkpoint-496"                     # checkpoint inside that folder
 ```
 
-In **Colab**, also set `COLAB_DRIVE_CHECKPOINT_PATH` at the top of `main.py` to the full Drive path of the checkpoint folder. The pipeline will copy it to the local `models/` folder automatically before training starts:
+In **Colab**, `COLAB_DRIVE_MODELS_BASE` at the top of `main.py` is the only variable you need — set it once and never touch it again. The pipeline automatically derives the full checkpoint path from it using `config.parent_run_folder` and `config.resume_checkpoint_name`:
 
 ```python
-# main.py  (Colab config section)
-COLAB_DRIVE_CHECKPOINT_PATH = "/content/drive/MyDrive/audio_mood_classifier_hf/models/mood_classifier_2026-07-15_14-39/checkpoint-496"
+# main.py  (Colab config section — set once)
+COLAB_DRIVE_MODELS_BASE = "/content/drive/MyDrive/audio_mood_classifier_hf/models"
 ```
 
-Leave it as `""` for a clean new run (no resumption from Drive).
+From then on, to resume from a different checkpoint you only update `config.py`:
+
+```python
+# src/config.py  (the only file you edit between runs)
+parent_run_folder      = "mood_classifier_2026-07-15_14-39"
+resume_checkpoint_name = "checkpoint-496"
+```
+
+Leave `parent_run_folder` and `resume_checkpoint_name` both empty for a clean new run (no resumption from Drive).
 
 ---
 

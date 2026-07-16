@@ -227,9 +227,12 @@ class PipelineManager:
     def _ensure_resume_checkpoint(self) -> None:
         """
         Colab only: if the checkpoint configured in config.py does not exist in
-        the local models/ folder but COLAB_DRIVE_CHECKPOINT_PATH is set and
-        points to a valid Drive folder, copies it to the expected local path so
-        that load_model_from_checkpoint() can proceed normally.
+        the local models/ folder, copies it from Drive automatically.
+
+        The Drive path is auto-derived from COLAB_DRIVE_MODELS_BASE (set once in
+        main.py) combined with config.parent_run_folder and
+        config.resume_checkpoint_name — so only config.py needs updating between
+        runs.
 
         On a local machine, or when no resumption is configured, this is a no-op.
         The caller (main.py) is responsible for checking config.checkpoint_to_load
@@ -250,16 +253,22 @@ class PipelineManager:
         except ImportError:
             return  # Local machine — let load_model_from_checkpoint raise the error.
 
-        drive_path_str = os.environ.get("COLAB_DRIVE_CHECKPOINT_PATH", "").strip()
-        if not drive_path_str:
+        # Auto-derive the Drive path from the base models folder + config values.
+        models_base = os.environ.get("COLAB_DRIVE_MODELS_BASE", "").strip()
+        if not models_base:
             print(
                 "[WARN] Resume checkpoint not found locally and "
-                "COLAB_DRIVE_CHECKPOINT_PATH is not set in main.py.\n"
-                "       Set it to the full Drive path of the checkpoint folder."
+                "COLAB_DRIVE_MODELS_BASE is not set in main.py.\n"
+                "       Set it to the Drive path of your models folder "
+                "(e.g. /content/drive/MyDrive/audio_mood_classifier_hf/models)."
             )
             return
 
-        drive_path = Path(drive_path_str)
+        drive_path = (
+            Path(models_base)
+            / self.config.parent_run_folder
+            / self.config.resume_checkpoint_name
+        )
         if not drive_path.exists():
             print(f"[WARN] Drive checkpoint path not found: '{drive_path}'.")
             print("       Make sure Drive is mounted and the path is correct.")
