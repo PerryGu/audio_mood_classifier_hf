@@ -66,7 +66,7 @@ class TrainingConfig:
     #   "test"        → evaluate on test set (summary + per-class table)
     #   "both"        → train then evaluate on test set
     #   "test_detail" → per-segment inference on test set with confidence scores
-    mode: str = "test_detail" #"train" / "test" / "both" / "test_detail"
+    mode: str = "both" #"train" / "test" / "both" / "test_detail"
 
     # --- Test Detail Mode ---
     # Used when mode="test_detail". Runs per-segment inference with confidence scores.
