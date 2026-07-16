@@ -71,9 +71,9 @@ audio_mood_classifier_hf/
     ├── data_processing/
     │   ├── data_loader.py           # Load MP3s with librosa, build HF Dataset
     │   ├── data_processor.py        # Feature extraction & group-shuffle splitting
-    │   └── dataset.py               # AudioDataset class
-    ├── training/
-    │   └── config.py                # TrainingConfig dataclass (hyperparameters)
+    │   ├── dataset.py               # AudioDataset class
+    │   └── augmentation.py          # SpecAugmentCollator — on-the-fly training augmentation
+    ├── config.py                    # TrainingConfig dataclass (all hyperparameters & flags)
     └── utils/
         ├── load_model.py            # AST model & feature extractor initialization
         ├── tests.py                 # Integrity checks, leakage detection, debug tools
@@ -125,8 +125,11 @@ python main.py
 # Train only
 python main.py --mode train
 
-# Evaluate only (loads from configured checkpoint)
+# Evaluate only — summary + per-class table (loads from configured checkpoint)
 python main.py --mode test
+
+# Per-segment detail evaluation with confidence scores
+python main.py --mode test_detail
 
 # Enable debug / integrity checks
 python main.py --debug
@@ -246,7 +249,7 @@ When `main.py` runs it will automatically:
 
 ## Training Configuration
 
-All hyperparameters and run-behaviour flags live in **`src/training/config.py`** — the single source of truth. Edit them there; `main.py` applies them automatically. CLI flags (`--debug`, `--mode`) override config values for one-off runs without touching the file.
+All hyperparameters and run-behaviour flags live in **`src/config.py`** — the single source of truth. Edit them there; `main.py` applies them automatically. CLI flags (`--debug`, `--mode`) override config values for one-off runs without touching the file.
 
 ### Hyperparameters
 
@@ -284,12 +287,48 @@ Controlled by `num_unfrozen_layers` in `config.py`. The classifier head is alway
 
 > When unfreezing layers on top of a checkpoint, always lower `learning_rate` significantly — too high a value will destroy the pre-trained representations rather than adapting them.
 
+### SpecAugment (data augmentation)
+
+Applied **on-the-fly to training batches only** — eval and test batches are always clean. Implemented in `src/data_processing/augmentation.py` as `SpecAugmentCollator`, which randomly zeros rectangular strips on the time and frequency axes of each spectrogram before it reaches the model.
+
+| Field | Default | Description |
+|---|---|---|
+| `spec_augment` | `True` | Enable / disable SpecAugment |
+| `mask_time_count` | `2` | Number of time masks applied per spectrogram |
+| `mask_time_ratio` | `0.10` | Maximum fraction of the time axis each mask may cover |
+| `mask_freq_count` | `2` | Number of frequency masks applied per spectrogram |
+| `mask_freq_ratio` | `0.10` | Maximum fraction of the frequency axis each mask may cover |
+
+> The collator auto-detects training vs. eval mode via `torch.is_grad_enabled()` — no separate collator is needed for evaluation.
+
 ### Run behaviour
 
 | Field | Default | Description |
 |---|---|---|
-| `mode` | `"both"` | `"train"` / `"test"` / `"both"` — overridable with `--mode` |
+| `mode` | `"both"` | `"train"` / `"test"` / `"both"` / `"test_detail"` — overridable with `--mode` |
 | `debug` | `False` | Enable integrity checks — overridable with `--debug` |
+
+### Segment inspection (read-only dataset view)
+
+Prints a flat table of every segment after the dataset is prepared — no inference, just a view of what's in each split. Useful for auditing labels and checking which songs landed in which split.
+
+| Field | Default | Description |
+|---|---|---|
+| `inspect_segments` | `False` | `True` to enable the table |
+| `inspect_segments_split` | `"all"` | `"all"` / `"train"` / `"eval"` / `"test"` — which split(s) to show |
+| `inspect_segment_ids` | `None` | `None` = all rows; `42` = single row; `(10,30)` = range; `[5,12,99]` = specific |
+
+### Test detail mode
+
+Runs per-segment inference and prints a table showing true label, predicted label, per-class confidence scores, and ✓/✗ for each row. Activated by `mode="test_detail"`.
+
+| Field | Default | Description |
+|---|---|---|
+| `detail_split_test` | `"test"` | Which split to run inference on: `"test"` / `"eval"` / `"train"` / `"all"` |
+| `detail_filter_test` | `None` | `None` = all; `"songname"` = filter by song; `42` / `(10,30)` / `[5,12]` = by index |
+| `detail_aggregate_songs` | `False` | When `True`, sums confidence scores across all segments of the same song and shows **one row per song** (late fusion / score aggregation) instead of one row per segment |
+
+**Song-level aggregation** (`detail_aggregate_songs=True`) typically gives 2–4 pp higher accuracy than segment-level evaluation because noise from individual ambiguous segments averages out across the 6 segments of each song. This is also the strategy recommended for the Gradio inference app.
 
 ### Checkpoint management
 
@@ -375,24 +414,49 @@ Produces `128-bin dB-scaled Mel-spectrogram PNGs` (400×400 px, magma colormap) 
 
 ```
 setup_environment()              ← install missing packages (Colab) + load HF_TOKEN
+                                    HF Hub login is non-fatal — a 504 timeout is caught and
+                                    logged as a warning; local checkpoints still work fine
 run_data_loading()               ← load MP3s with librosa → HF Dataset (cached to disk)
 run_model_loading()              ← resolve model source (priority order below), load AST,
                                     freeze/unfreeze layers per num_unfrozen_layers,
                                     re-init classification head for num_labels classes;
                                     if downloaded from HF Hub → save to models/ast_pretrained/
-                                    so future runs load locally without re-downloading
+                                    so future runs load locally without re-downloading;
+                                    id2label / label2id saved into model config so checkpoints
+                                    carry human-readable class names (not LABEL_0, LABEL_1 …)
 prepare_dataset()                ← extract input_values via ASTFeatureExtractor (cached)
                                     uses 1 process + batch_size=16 in Colab to avoid stalling
 split_dataset(test_size=0.3)    ← group-shuffle split: 70% train / 15% test / 15% eval
 map_labels_to_ids()              ← convert string labels → integer IDs
-[--debug]  inspect_dataset_samples()
+
+[inspect_segments=True]
+           inspect_segment_table()        read-only table of every segment: ID, song, label,
+                                          split — filtered by inspect_segment_ids /
+                                          inspect_segments_split; grouped by split then label
+
 [train]    _ensure_resume_checkpoint()    if resuming (copies from Drive in Colab)
            load_model_from_checkpoint()   if resuming (loads weights, re-applies freeze)
            save_training_info()           → training_info.json
-           run_training(trainer)          → trainer.train() with terminal noise suppressed
+           run_training(trainer)          → trainer.train() with terminal noise suppressed;
+                                          SpecAugmentCollator applied to training batches
+                                          when spec_augment=True (eval/test always clean)
            save_session_steps()           → session_log.json (for continuous TensorBoard)
-[test]     evaluate_on_test()            → test_performance.txt
-           backup_to_drive()             → copy models/<run>/ and runs/ to Drive (Colab only)
+
+[test]     evaluate_on_test()            → summary + per-class breakdown table:
+                                            correct / wrong counts and % for each class
+                                          → test_performance.txt
+
+[test_detail]
+           evaluate_on_test_detail()     → per-segment inference table with true label,
+                                            predicted label, per-class confidence scores,
+                                            and ✓/✗; filtered by detail_filter_test /
+                                            detail_split_test
+           (detail_aggregate_songs=True) → sum confidence scores across all segments of
+                                            the same song → one prediction per song
+                                            (late fusion; typically 2–4 pp better than
+                                            per-segment accuracy)
+
+[colab]    backup_to_drive()             → copy models/<run>/ and runs/ to Drive
 ```
 
 ### Dataset splitting strategy
@@ -415,6 +479,24 @@ random_baseline   — 33.33% (1/3 for 3 classes)
 gain_over_random  — accuracy − random_baseline (percentage points)
 loss              — cross-entropy
 ```
+
+`evaluate_on_test()` (mode `"test"`) additionally prints a **per-class breakdown table** showing the number and percentage of correct vs. incorrect segments for each mood class — useful for diagnosing which category the model struggles with the most.
+
+`evaluate_on_test_detail()` (mode `"test_detail"`) provides a **per-segment inference table** with one row per segment (or per song when `detail_aggregate_songs=True`):
+
+| Column | Description |
+|---|---|
+| `id` | Index of the segment in the dataset |
+| `song` | Song name (from `song_id`) |
+| `split` | Which split the segment belongs to |
+| `true` | Ground-truth label |
+| `pred` | Model prediction |
+| `✓/✗` | Correct / incorrect |
+| `conf_<class>` | Softmax confidence for each class |
+
+At the bottom of the table a summary line shows total ✓ / ✗ counts and the accuracy percentage.
+
+When `detail_aggregate_songs=True` the confidence columns are **summed** across all segments of the same song before taking `argmax`. This late-fusion approach is significantly more robust than per-segment prediction for short clips.
 
 ---
 

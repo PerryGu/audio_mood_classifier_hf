@@ -16,9 +16,10 @@ from src.utils import load_model
 from datasets import load_from_disk
 from src.data_processing import data_loader
 from src.data_processing import data_processor
-from src.training.config import TrainingConfig
+from src.config import TrainingConfig
 from src.data_processing.dataset import AudioDataset
 from transformers import Trainer, TrainingArguments, TrainerCallback, default_data_collator, AutoModelForAudioClassification
+from src.data_processing.augmentation import SpecAugmentCollator
 
 
 class _ContinuousLoggingCallback(TrainerCallback):
@@ -124,9 +125,16 @@ class PipelineManager:
         # from_pretrained() / load_dataset() call in this session uses the token,
         # even if the individual call site does not pass it explicitly.
         if self.hf_token:
-            from huggingface_hub import login
-            login(token=self.hf_token, add_to_git_credential=False)
-            print("[INFO] Hugging Face Hub: authenticated successfully.")
+            try:
+                from huggingface_hub import login
+                login(token=self.hf_token, add_to_git_credential=False)
+                print("[INFO] Hugging Face Hub: authenticated successfully.")
+            except Exception as e:
+                # A network error (e.g. 504 Gateway Timeout) during token validation
+                # must not abort the run — local checkpoints and cached models work
+                # without Hub connectivity.
+                print(f"[WARN] Hugging Face Hub login failed ({type(e).__name__}: {e})")
+                print("[WARN] Continuing without Hub authentication — local files only.")
         else:
             print("[WARN] HF_TOKEN not found — Hub access will be unauthenticated.")
             print("       Local: add it to your .env file.")
@@ -377,6 +385,8 @@ class PipelineManager:
     def map_labels_to_ids(self):
         """
         Maps string labels to numeric IDs after dataset splitting.
+        Also writes id2label / label2id into model.config so the mapping
+        is saved with every checkpoint and readable at test / inference time.
         """
         # Ensure we have the mapping dictionary
         if not hasattr(self, 'label_to_id') or self.label_to_id is None:
@@ -391,7 +401,14 @@ class PipelineManager:
             # name 'labels', which is what the HuggingFace Trainer expects.
             self.dataset[split] = self.dataset[split].remove_columns(['label'])
             self.dataset[split] = self.dataset[split].add_column('labels', new_labels)
-            
+
+        # Persist the human-readable names into the model config so they are
+        # saved with every checkpoint and available at test / inference time.
+        if self.model is not None:
+            id2label = {v: k for k, v in self.label_to_id.items()}
+            self.model.config.id2label  = id2label
+            self.model.config.label2id  = self.label_to_id
+
         print("[INFO] Dataset labels mapped to numeric IDs successfully.")
 
 
@@ -714,13 +731,31 @@ class PipelineManager:
             dataloader_pin_memory=_use_gpu,
         )
 
+        # Build the data collator — SpecAugment is applied only during training
+        # (the collator detects eval/test via torch.is_grad_enabled()).
+        if self.config.spec_augment:
+            collator = SpecAugmentCollator(
+                mask_time_count=self.config.mask_time_count,
+                mask_time_ratio=self.config.mask_time_ratio,
+                mask_freq_count=self.config.mask_freq_count,
+                mask_freq_ratio=self.config.mask_freq_ratio,
+            )
+            print(
+                f"[INFO] SpecAugment enabled — "
+                f"time masks: {self.config.mask_time_count} × {self.config.mask_time_ratio:.0%}, "
+                f"freq masks: {self.config.mask_freq_count} × {self.config.mask_freq_ratio:.0%}"
+            )
+        else:
+            collator = default_data_collator
+            print("[INFO] SpecAugment disabled.")
+
         # Initialize and return the Trainer
         trainer = Trainer(
             model=self.model,
             args=training_args,
             train_dataset=train_ds,
             eval_dataset=eval_ds,
-            data_collator=default_data_collator,
+            data_collator=collator,
             compute_metrics=self._compute_metrics,
             callbacks=[continuous_callback],
         )
@@ -774,8 +809,15 @@ class PipelineManager:
         # Create a new Trainer instance for evaluation.
         # output_dir must be set explicitly — without it transformers 5.x
         # falls back to the default "tmp_trainer" folder in the project root.
+        # Use the loaded checkpoint's run folder when available so no new
+        # timestamped folder is created for test-only runs.
+        _eval_output_dir = (
+            str(Path(checkpoint_folder).parent)
+            if checkpoint_folder
+            else os.path.join(os.getcwd(), "models", "eval_output")
+        )
         test_args = TrainingArguments(
-            output_dir=self.config.output_dir,
+            output_dir=_eval_output_dir,
             report_to="none",
         )
         test_trainer = Trainer(
@@ -786,24 +828,289 @@ class PipelineManager:
             compute_metrics=self._compute_metrics,
         )
 
-        metrics = test_trainer.evaluate()
+        import numpy as np
+
+        pred_output = test_trainer.predict(self.dataset['test'])
+        metrics     = pred_output.metrics
 
         # Log and save metrics via the evaluation trainer
         if test_trainer.state.is_world_process_zero:
             test_trainer.log_metrics("test", metrics)
             test_trainer.save_metrics("test", metrics)
 
-        accuracy        = metrics.get("eval_accuracy", 0)
-        random_baseline = metrics.get("eval_random_baseline", 0)
-        gain            = metrics.get("eval_gain_over_random", 0)
-        loss            = metrics.get("eval_loss", 0)
+        logits      = pred_output.predictions
+        labels      = pred_output.label_ids
+        predictions = np.argmax(logits, axis=-1)
+
+        # Resolve human-readable class names.
+        # Priority: model config (set by map_labels_to_ids and saved in checkpoint)
+        # → runtime label_to_id built during this session
+        # → fall back to generic "class N" labels.
+        cfg_id2label = getattr(getattr(model_to_test, "config", None), "id2label", None) or {}
+        runtime_id2label = (
+            {v: k for k, v in self.label_to_id.items()}
+            if hasattr(self, "label_to_id") and self.label_to_id
+            else {}
+        )
+        # Use config names only when they look real (not "LABEL_N" placeholders).
+        if cfg_id2label and not any(v.startswith("LABEL_") for v in cfg_id2label.values()):
+            id2label = cfg_id2label
+        elif runtime_id2label:
+            id2label = runtime_id2label
+        else:
+            id2label = cfg_id2label
+
+        accuracy        = metrics.get("test_accuracy", metrics.get("eval_accuracy", 0))
+        random_baseline = metrics.get("test_random_baseline", metrics.get("eval_random_baseline", 0))
+        gain            = metrics.get("test_gain_over_random", metrics.get("eval_gain_over_random", 0))
+        loss            = metrics.get("test_loss", metrics.get("eval_loss", 0))
+
+        total   = len(labels)
+        correct = int((predictions == labels).sum())
+
         print("\n[RESULTS] ─────────────────────────────────")
-        print(f"  Accuracy:         {accuracy:.2f}%")
+        print(f"  Accuracy:         {accuracy:.2f}%  ({correct} / {total} correct)")
         print(f"  Random baseline:  {random_baseline:.2f}%")
         print(f"  Gain over random: +{gain:.2f} pp")
         print(f"  Loss:             {loss:.4f}")
+        print()
+
+        # Per-class breakdown
+        class_ids = sorted(set(labels.tolist()))
+        col_w = max((len(id2label.get(i, f"class {i}")) for i in class_ids), default=8)
+        header = f"  {'Class':<{col_w}}   Total   Correct   Wrong   Accuracy"
+        print(header)
+        print("  " + "─" * (len(header) - 2))
+        for cid in class_ids:
+            name      = id2label.get(cid, f"class {cid}")
+            mask      = labels == cid
+            cls_total = int(mask.sum())
+            cls_ok    = int((predictions[mask] == cid).sum())
+            cls_bad   = cls_total - cls_ok
+            cls_acc   = 100.0 * cls_ok / cls_total if cls_total else 0.0
+            print(f"  {name:<{col_w}}   {cls_total:>5}   {cls_ok:>7}   {cls_bad:>5}   {cls_acc:.1f}%")
         print("[RESULTS] ─────────────────────────────────\n")
         return metrics
+
+
+    # =========================================================================
+    # EVALUATE ON TEST (DETAIL): Per-segment inference with confidence scores.
+    # =========================================================================
+    def evaluate_on_test_detail(self, checkpoint_folder=None, filter_by=None, split="test", aggregate_songs=False):
+        """
+        Runs inference on any dataset split and prints a per-segment table
+        showing true label, predicted label, per-class confidence scores,
+        and whether each prediction was correct.
+
+        Parameters
+        ----------
+        checkpoint_folder : str | None
+            Same semantics as evaluate_on_test — None uses the in-memory model.
+        split : str
+            Which dataset split to run inference on: "test" (default), "eval", or "train".
+        filter_by : None | str | int | tuple | list
+            Controls which segments within the split to show:
+              None          → all segments
+              "mysong"      → all segments whose song_id contains "mysong"
+              42            → single segment with global index 42
+              (10, 30)      → segments 10–29
+              [5, 12, 99]   → specific segments by global index
+        aggregate_songs : bool
+            When True, sums confidence scores across all segments of the same
+            song and shows one row per song (late fusion / score aggregation).
+            When False (default), shows one row per segment.
+        """
+        import numpy as np
+        import torch
+
+        # ── Load model ────────────────────────────────────────────────────────
+        if checkpoint_folder:
+            from pathlib import Path
+            checkpoint_path = Path(checkpoint_folder)
+            if not checkpoint_path.is_absolute():
+                checkpoint_path = Path(os.getcwd()) / checkpoint_folder
+            if not checkpoint_path.exists():
+                raise FileNotFoundError(
+                    f"[ERROR] Checkpoint not found: {checkpoint_path}"
+                )
+            print(f"[INFO] Loading model from: {checkpoint_path}")
+            model_to_test = AutoModelForAudioClassification.from_pretrained(
+                checkpoint_path, local_files_only=True,
+            )
+        else:
+            print("[INFO] No checkpoint specified — using the in-memory model.")
+            model_to_test = self.model
+
+        # ── Resolve label names ───────────────────────────────────────────────
+        cfg_id2label = getattr(getattr(model_to_test, "config", None), "id2label", None) or {}
+        runtime_id2label = (
+            {v: k for k, v in self.label_to_id.items()}
+            if hasattr(self, "label_to_id") and self.label_to_id else {}
+        )
+        if cfg_id2label and not any(v.startswith("LABEL_") for v in cfg_id2label.values()):
+            id2label = cfg_id2label
+        elif runtime_id2label:
+            id2label = runtime_id2label
+        else:
+            id2label = cfg_id2label
+
+        # ── Build filtered index list ─────────────────────────────────────────
+        # "all" means concatenate all splits.
+        if not split or split == "all":
+            from datasets import concatenate_datasets
+            test_ds  = concatenate_datasets(list(self.dataset.values()))
+        elif split not in self.dataset:
+            raise ValueError(f"Split '{split}' not found. Available: {list(self.dataset.keys())}")
+        else:
+            test_ds  = self.dataset[split]
+        n_total   = len(test_ds)
+        song_ids  = test_ds["song_id"] if "song_id" in test_ds.column_names else [""] * n_total
+
+        if filter_by is None:
+            indices = list(range(n_total))
+        elif isinstance(filter_by, str):
+            indices = [i for i, s in enumerate(song_ids) if filter_by in s]
+        elif isinstance(filter_by, int):
+            indices = [filter_by]
+        elif isinstance(filter_by, tuple) and len(filter_by) == 2:
+            indices = list(range(filter_by[0], filter_by[1]))
+        elif isinstance(filter_by, list):
+            indices = filter_by
+        else:
+            raise TypeError(f"filter_by must be None, str, int, tuple, or list — got {type(filter_by)}")
+
+        if not indices:
+            print("[WARN] No test segments matched the filter.")
+            return
+
+        subset_ds = test_ds.select(indices)
+
+        # ── Run inference ─────────────────────────────────────────────────────
+        _eval_output_dir = (
+            str(Path(checkpoint_folder).parent)
+            if checkpoint_folder
+            else os.path.join(os.getcwd(), "models", "eval_output")
+        )
+        test_args = TrainingArguments(
+            output_dir=_eval_output_dir,
+            report_to="none",
+        )
+        test_trainer = Trainer(
+            model=model_to_test,
+            args=test_args,
+            eval_dataset=subset_ds,
+            data_collator=default_data_collator,
+            compute_metrics=self._compute_metrics,
+        )
+
+        pred_output  = test_trainer.predict(subset_ds)
+        logits       = pred_output.predictions          # (N, num_classes)
+        true_labels  = pred_output.label_ids            # (N,)
+        predictions  = np.argmax(logits, axis=-1)       # (N,)
+
+        # Softmax for confidence scores
+        exp_l     = np.exp(logits - logits.max(axis=-1, keepdims=True))
+        probs     = exp_l / exp_l.sum(axis=-1, keepdims=True)
+
+        # ── Shared formatting helpers ─────────────────────────────────────────
+        class_names = [id2label.get(i, f"class_{i}") for i in range(logits.shape[-1])]
+        col_w  = max(len(n) for n in class_names)
+        name_w = max((len(s) for s in song_ids), default=8)
+        conf_headers = "  ".join(f"{n:>{col_w}}" for n in class_names)
+
+        split_label = "all" if not split or split == "all" else split.upper()
+        print(f"\n[DETAIL] Split: {split_label}  |  filter: {filter_by!r}  "
+              f"|  aggregate: {aggregate_songs}  ({len(indices)} / {n_total} segments)")
+
+        def _print_summary(correct_count, total, true_arr, pred_arr):
+            wrong = total - correct_count
+            acc   = 100.0 * correct_count / total if total else 0.0
+            sep_s = "  " + "─" * 68
+            print(sep_s)
+            print(f"  {'Total':<20}  {total}")
+            print(f"  {'Correct  ✓':<20}  {correct_count}  ({acc:.1f}%)")
+            print(f"  {'Wrong    ✗':<20}  {wrong}  ({100 - acc:.1f}%)")
+            print()
+            cls_head = f"  {'Class':<{col_w}}   Total   Correct   Wrong   Accuracy"
+            print(cls_head)
+            print("  " + "─" * (len(cls_head) - 2))
+            for cid in sorted(set(true_arr.tolist())):
+                name    = id2label.get(int(cid), f"class_{cid}")
+                mask    = true_arr == cid
+                cls_tot = int(mask.sum())
+                cls_ok  = int((pred_arr[mask] == cid).sum())
+                cls_acc = 100.0 * cls_ok / cls_tot if cls_tot else 0.0
+                print(f"  {name:<{col_w}}   {cls_tot:>5}   {cls_ok:>7}   {cls_tot-cls_ok:>5}   {cls_acc:.1f}%")
+            print(sep_s + "\n")
+
+        if not aggregate_songs:
+            # ── Per-segment table ─────────────────────────────────────────────
+            header = (f"\n  {'idx':>4}  {'song_id':<{name_w}}  "
+                      f"{'true':<{col_w}}  {'predicted':<{col_w}}  "
+                      f"{conf_headers}  ok?")
+            sep = "  " + "─" * (len(header) - 2)
+            print(header)
+            print(sep)
+
+            correct_count = 0
+            for global_idx, true_id, pred_id, prob_row in zip(
+                indices, true_labels, predictions, probs
+            ):
+                song   = song_ids[global_idx]
+                true_n = id2label.get(int(true_id), str(true_id))
+                pred_n = id2label.get(int(pred_id), str(pred_id))
+                ok     = "✓" if true_id == pred_id else "✗"
+                if true_id == pred_id:
+                    correct_count += 1
+                conf_str = "  ".join(f"{p:>{col_w}.2%}" for p in prob_row)
+                print(f"  {global_idx:>4}  {song:<{name_w}}  "
+                      f"{true_n:<{col_w}}  {pred_n:<{col_w}}  "
+                      f"{conf_str}  {ok}")
+
+            _print_summary(correct_count, len(indices), true_labels, predictions)
+
+        else:
+            # ── Per-song aggregated table (late fusion) ───────────────────────
+            from collections import OrderedDict
+            songs_data = OrderedDict()
+            for global_idx, true_id, prob_row in zip(indices, true_labels, probs):
+                base = song_ids[global_idx].rsplit("_seg", 1)[0]
+                if base not in songs_data:
+                    songs_data[base] = {"first_idx": global_idx,
+                                        "true_id": int(true_id),
+                                        "probs": []}
+                songs_data[base]["probs"].append(prob_row)
+
+            agg_true = []
+            agg_pred = []
+
+            header = (f"\n  {'idx':>4}  {'song_id':<{name_w}}  "
+                      f"{'true':<{col_w}}  {'predicted':<{col_w}}  "
+                      f"{conf_headers}  segs  ok?")
+            sep = "  " + "─" * (len(header) - 2)
+            print(header)
+            print(sep)
+
+            correct_count = 0
+            for base, data in songs_data.items():
+                summed   = np.sum(data["probs"], axis=0)
+                pred_id  = int(np.argmax(summed))
+                true_id  = data["true_id"]
+                ok       = "✓" if pred_id == true_id else "✗"
+                if pred_id == true_id:
+                    correct_count += 1
+                agg_true.append(true_id)
+                agg_pred.append(pred_id)
+                true_n   = id2label.get(true_id, str(true_id))
+                pred_n   = id2label.get(pred_id, str(pred_id))
+                n_segs   = len(data["probs"])
+                conf_str = "  ".join(f"{s:>{col_w}.2f}" for s in summed)
+                print(f"  {data['first_idx']:>4}  {base:<{name_w}}  "
+                      f"{true_n:<{col_w}}  {pred_n:<{col_w}}  "
+                      f"{conf_str}  {n_segs:>4}  {ok}")
+
+            _print_summary(correct_count, len(songs_data),
+                           np.array(agg_true), np.array(agg_pred))
 
 
     # =========================================================================

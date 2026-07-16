@@ -121,6 +121,108 @@ def generate_split_summary(split_dataset, ids=None):
         print(summary.to_string())
 
 
+def inspect_segment_table(split_dataset, ids=None, id2label=None, split=None):
+    """
+    Prints a flat table of every segment across all (or selected) splits.
+
+    Parameters
+    ----------
+    split_dataset : dict
+        The pipeline's self.dataset dict (keys: 'train', 'eval', 'test').
+    ids : None | int | tuple | slice | list[int]
+        Which rows to show by global index within the chosen split(s):
+          None          → all rows
+          42            → only row 42
+          (10, 20)      → rows 10–19
+          slice(10, 20) → rows 10–19
+          [5, 12, 99]   → rows 5, 12 and 99
+    id2label : dict | None
+        Optional {int: str} mapping to show human-readable labels.
+    split : str | None
+        Which split to show — "train", "eval", or "test".
+        None (default) shows all splits combined.
+
+    Examples
+    --------
+    inspect_segment_table(mgr.dataset)                          # all splits, all rows
+    inspect_segment_table(mgr.dataset, split="test")            # test split only
+    inspect_segment_table(mgr.dataset, split="eval", ids=(0,20))
+    """
+    rows = []
+    label_col = "labels" if "labels" in next(iter(split_dataset.values())).column_names else "label"
+
+    splits_to_show = (
+        {split: split_dataset[split]}
+        if split and split != "all" and split in split_dataset
+        else split_dataset
+    )
+    for split_name, ds in splits_to_show.items():
+        # Use vectorized column access — avoids deserializing input_values per row.
+        song_ids = ds["song_id"] if "song_id" in ds.column_names else ["—"] * len(ds)
+        raw_labels = ds[label_col]
+        for song_id, raw_label in zip(song_ids, raw_labels):
+            label_str = (id2label.get(raw_label, str(raw_label)) if id2label else str(raw_label))
+            rows.append({
+                "song_id": song_id,
+                "label":   label_str,
+                "split":   split_name,
+            })
+
+    df = pd.DataFrame(rows)
+    df.index.name = "id"
+
+    # Apply ID filter
+    if ids is None:
+        subset = df
+    elif isinstance(ids, int):
+        subset = df.iloc[[ids]]
+    elif isinstance(ids, tuple) and len(ids) == 2:
+        subset = df.iloc[ids[0]:ids[1]]
+    elif isinstance(ids, slice):
+        subset = df.iloc[ids]
+    elif isinstance(ids, list):
+        subset = df.iloc[ids]
+    else:
+        raise TypeError(f"ids must be None, int, (start,end) tuple, slice, or list — got {type(ids)}")
+
+    # Summary header
+    total = len(df)
+    shown = len(subset)
+    split_counts = df["split"].value_counts().to_dict()
+    counts_str = "  |  ".join(f"{s}: {split_counts.get(s, 0)}" for s in split_dataset.keys())
+    print(f"\n--- Segment Table  (total: {total}  |  {counts_str}) ---")
+    if shown < total:
+        print(f"    Showing {shown} of {total} rows")
+
+    # Print each split as its own block, further grouped by label.
+    splits_in_view = subset["split"].unique()
+    sep_thick = "═" * 70
+    sep_thin  = "─" * 70
+    first_split = True
+    for split_name in split_dataset.keys():
+        if split_name not in splits_in_view:
+            continue
+        chunk = subset[subset["split"] == split_name]
+        if not first_split:
+            print(sep_thick)
+        first_split = False
+        print(f"\n  [{split_name.upper()}]  ({len(chunk)} segments)")
+
+        # Group by label within the split
+        labels_in_chunk = chunk["label"].unique()
+        first_label = True
+        for lbl in sorted(labels_in_chunk):
+            lbl_chunk = chunk[chunk["label"] == lbl]
+            if not first_label:
+                print(sep_thin)
+            first_label = False
+            print(f"  · {lbl}  ({len(lbl_chunk)} segments)")
+            print(lbl_chunk.to_string())
+
+    print(f"\n--- end ---\n")
+    return subset
+
+
 def validate_dataset_preparation(mgr, label_to_id):
     """
     Orchestrates the creation and validation of the AudioDataset.

@@ -67,6 +67,7 @@ except ImportError:
 
 import argparse
 from src.pipeline_manager import PipelineManager
+from src.utils import tests
 
 # Initialize the PipelineManager object.
 # This creates a persistent state container to hold the dataset and model
@@ -77,7 +78,7 @@ def main():
     print("Starting the main function")
     # 0. SETUP & CONFIGURATION
     # =========================================================================
-    # All hyperparameters and run-behaviour flags live in src/training/config.py.
+    # All hyperparameters and run-behaviour flags live in src/config.py.
     # Edit them there.  The CLI args below are optional one-shot overrides that
     # take precedence over the config values without requiring a file edit.
     parser = argparse.ArgumentParser(description="Run the ML Pipeline")
@@ -86,7 +87,7 @@ def main():
         help="Run integrity checks (overrides config.debug).",
     )
     parser.add_argument(
-        "--mode", choices=["train", "test", "both"], default=None,
+        "--mode", choices=["train", "test", "both", "test_detail"], default=None,
         help="Execution mode — overrides config.mode when provided.",
     )
     args = parser.parse_args()
@@ -139,7 +140,22 @@ def main():
     # Map labels to IDs BEFORE training
     mgr.map_labels_to_ids()
 
-    # 3. Optional Integrity Tests (Run only in DEBUG_MODE)
+    # 3a. Optional Segment Inspection Table
+    # =========================================================================
+    if mgr.config.inspect_segments:
+        _id2label = (
+            {v: k for k, v in mgr.label_to_id.items()}
+            if hasattr(mgr, "label_to_id") and mgr.label_to_id
+            else None
+        )
+        tests.inspect_segment_table(
+            mgr.dataset,
+            ids=mgr.config.inspect_segment_ids,
+            id2label=_id2label,
+            split=mgr.config.inspect_segments_split,
+        )
+
+    # 3b. Optional Integrity Tests (Run only in DEBUG_MODE)
     # =========================================================================
     if debug:
         print("[DEBUG_MODE] Running integrity checks...")
@@ -195,7 +211,19 @@ def main():
             f.write(f"Results for this run: {test_results}\n")
         print(f"[SUCCESS] Results saved to {file_path}")
 
-    # 6. BACKUP TO DRIVE (Colab only)
+    # 6. EVALUATE ON TEST (DETAIL)
+    # =========================================================================
+    if mode == 'test_detail':
+        print("[INFO] Running detailed per-segment evaluation...")
+        detail_checkpoint = mgr.config.checkpoint_to_load or None
+        mgr.evaluate_on_test_detail(
+            checkpoint_folder=detail_checkpoint,
+            split=mgr.config.detail_split_test,
+            filter_by=mgr.config.detail_filter_test,
+            aggregate_songs=mgr.config.detail_aggregate_songs,
+        )
+
+    # 7. BACKUP TO DRIVE (Colab only)
     # =========================================================================
     # Copies the timestamped checkpoint folder and runs/ to Google Drive so
     # they survive Colab session termination. No-op on a local machine.
