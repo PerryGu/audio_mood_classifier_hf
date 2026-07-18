@@ -1,0 +1,7 @@
+gradio
+torch
+transformers
+librosa
+mutagen
+pyloudnorm
+numpy

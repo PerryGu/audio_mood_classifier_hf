@@ -17,6 +17,8 @@ The goal was to go from a hand-curated list of songs all the way to a trained an
 
 The pipeline handles the full workflow: data generation, feature extraction, group-aware dataset splitting (ensuring all segments from the same song stay in the same split, to prevent leakage between train/test/eval), training with checkpoint resumption, and evaluation with accuracy reported relative to the random baseline.
 
+The project runs in two environments — **locally** (with a GPU or CPU) and in **Google Colab** (free T4 GPU). Checkpoints are saved to Google Drive and can be copied back locally to continue training, keeping both environments in sync via a simple `git push` / `git pull`.
+
 ---
 
 ## Mood Classes
@@ -33,50 +35,58 @@ The pipeline handles the full workflow: data generation, feature extraction, gro
 
 ```
 audio_mood_classifier_hf/
-├── main.py                          # Entry point — runs the full ML pipeline
+├── main.py                              # Entry point — runs the full ML pipeline
 ├── requirements.txt
-├── .env                             # HF_TOKEN (local auth)
+├── .env                                 # HF_TOKEN (local auth)
+├── audio_mood_classifier_hf.ipynb       # Google Colab notebook (3-cell setup)
+│
+├── demos/                               # Gradio / HF Spaces deployment
+│   ├── upload_space.py                  # One-time script to publish the Space to HF
+│   └── audio_mood_classifier/           # The Space itself (uploaded as-is)
+│       ├── app.py                       # Gradio inference app
+│       ├── requirements.txt             # Space dependencies
+│       └── README.md                    # HF Spaces metadata + description
 │
 ├── data/
-│   ├── mp3_data/                    # Raw MP3 segments, organized by mood class
+│   ├── mp3_data/                        # Raw MP3 segments, organized by mood class
 │   │   ├── calm_melancholic/
 │   │   ├── energetic_upbeat/
 │   │   └── moderate_neutral/
-│   └── processed_dataset/           # Cached HF Dataset with extracted input_values
+│   └── processed_dataset/               # Cached HF Dataset with extracted input_values
 │
-├── data_generation/                 # Data pipeline scripts (run once to build dataset)
-│   ├── prepare_dataset.py           # Step 1 — match catalog against local music library
-│   ├── generate_songs_sagmens.py    # Step 2 — extract MP3 segments from matched tracks
-│   └── generate_spectrograms.py    # (Optional) Generate Mel-spectrogram PNGs instead
+├── data_generation/                     # Data pipeline scripts (run once to build dataset)
+│   ├── prepare_dataset.py               # Step 1 — match catalog against local music library
+│   ├── generate_songs_sagmens.py        # Step 2 — extract MP3 segments from matched tracks
+│   └── generate_spectrograms.py         # (Optional) Generate Mel-spectrogram PNGs instead
 │
 ├── docs/
-│   ├── songs_catalog.md             # Hand-curated track list by category
-│   └── catalog_with_paths.md        # Auto-generated: catalog + matched file paths
+│   ├── songs_catalog.md                 # Hand-curated track list by category
+│   └── catalog_with_paths.md            # Auto-generated: catalog + matched file paths
 │
 ├── models/
-│   ├── ast_pretrained/              # Base pre-trained AST model files (not committed to git)
+│   ├── ast_pretrained/                  # Base pre-trained AST model files (not committed to git)
 │   │   ├── config.json
 │   │   ├── preprocessor_config.json
 │   │   └── model.safetensors
-│   └── mood_classifier_<timestamp>/ # Training checkpoints (auto-created per session)
+│   └── mood_classifier_<timestamp>/     # Training checkpoints (auto-created per session)
 │       ├── checkpoint-N/
 │       ├── training_info.json
 │       └── test_performance.txt
 │
-├── runs/                            # TensorBoard logs (auto-created per session)
-│   └── continuous/                  # Aggregated multi-session logs for one curve
+├── runs/                                # TensorBoard logs (auto-created per session)
+│   └── continuous/                      # Aggregated multi-session logs for one curve
 │
 └── src/
-    ├── pipeline_manager.py          # Central state manager / pipeline orchestrator
+    ├── pipeline_manager.py              # Central state manager / pipeline orchestrator
+    ├── config.py                        # TrainingConfig dataclass (all hyperparameters & flags)
     ├── data_processing/
-    │   ├── data_loader.py           # Load MP3s with librosa, build HF Dataset
-    │   ├── data_processor.py        # Feature extraction & group-shuffle splitting
-    │   ├── dataset.py               # AudioDataset class
-    │   └── augmentation.py          # SpecAugmentCollator — on-the-fly training augmentation
-    ├── config.py                    # TrainingConfig dataclass (all hyperparameters & flags)
+    │   ├── data_loader.py               # Load MP3s with librosa, build HF Dataset
+    │   ├── data_processor.py            # Feature extraction & group-shuffle splitting
+    │   ├── dataset.py                   # AudioDataset class
+    │   └── augmentation.py              # SpecAugmentCollator — on-the-fly training augmentation
     └── utils/
-        ├── load_model.py            # AST model & feature extractor initialization
-        ├── tests.py                 # Integrity checks, leakage detection, debug tools
+        ├── load_model.py                # AST model & feature extractor initialization
+        ├── tests.py                     # Integrity checks, leakage detection, debug tools
         ├── get_model_params.py
         └── data_uploader.py
 ```
@@ -93,6 +103,8 @@ MyDrive/audio_mood_classifier_hf/
 ├── runs/                            # Auto-backed-up TensorBoard logs
 └── mp3_data.zip                     # Zipped MP3 dataset (extracted once on first run)
 ```
+
+> The Colab notebook (`audio_mood_classifier_hf.ipynb`) clones the repo from GitHub, mounts Drive, and extracts the MP3 data automatically — you never need to manually copy code files to Drive.
 
 ---
 
@@ -138,6 +150,10 @@ python main.py --debug
 ---
 
 ### Running in Google Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PerryGu/audio_mood_classifier_hf/blob/main/audio_mood_classifier_hf.ipynb)
+
+Open the notebook directly in Colab using the badge above, or find it at [`audio_mood_classifier_hf.ipynb`](audio_mood_classifier_hf.ipynb) in the project root.
 
 The notebook has **3 cells**. Run them in order.
 
