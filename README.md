@@ -41,7 +41,8 @@ audio_mood_classifier_hf/
 ├── audio_mood_classifier_hf.ipynb       # Google Colab notebook (3-cell setup)
 │
 ├── demos/                               # Gradio / HF Spaces deployment
-│   ├── upload_space.py                  # One-time script to publish the Space to HF
+│   ├── upload_model.py                  # Upload trained checkpoint to HF model repo
+│   ├── upload_space.py                  # Upload the Gradio app to HF Spaces
 │   └── audio_mood_classifier/           # The Space itself (uploaded as-is)
 │       ├── app.py                       # Gradio inference app
 │       ├── requirements.txt             # Space dependencies

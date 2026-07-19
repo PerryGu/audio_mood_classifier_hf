@@ -1,7 +1,9 @@
-gradio
-torch
+gradio==5.33.0
 transformers
+torch
+spaces
 librosa
+soundfile
 mutagen
 pyloudnorm
 numpy
