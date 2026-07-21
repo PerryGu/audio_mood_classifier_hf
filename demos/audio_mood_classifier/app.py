@@ -223,6 +223,32 @@ def _bar(fraction: float) -> str:
     return "█" * filled + "░" * (BAR_WIDTH - filled)
 
 
+def song_display_name(audio_path: str | None) -> str:
+    """Return a human-readable song name from metadata or the uploaded filename."""
+    if not audio_path:
+        return "No song selected"
+
+    path = Path(audio_path)
+
+    try:
+        meta = mutagen.File(str(path))
+        if meta is not None and getattr(meta, "tags", None):
+            tags = meta.tags
+            title = tags.get("TIT2") or tags.get("\xa9nam") or tags.get("TITLE")
+            artist = tags.get("TPE1") or tags.get("\xa9ART") or tags.get("ARTIST")
+            if title:
+                title = str(title[0] if isinstance(title, list) else title)
+                if artist:
+                    artist = str(artist[0] if isinstance(artist, list) else artist)
+                    return f"{artist} — {title}"
+                return title
+    except Exception:
+        pass
+
+    name = path.stem.replace("_", " ").strip()
+    return name or "Unknown song"
+
+
 @spaces.GPU(duration=45)
 def classify_mood(audio_path: str) -> str:
     """
@@ -265,6 +291,12 @@ Upload any song (MP3) and the model will classify its overall mood — no lyrics
 - ⚡ **energetic_upbeat** — fast, high-energy, upbeat and driving
 
 > Because mood is subjective, the model targets broad emotional character rather than precise genre.
+
+> **Note:** This Space runs on CPU rather than a dedicated paid GPU, so predictions can take a little while — especially the first time you click Submit.
+
+**Links:**
+- [Model card](https://huggingface.co/guyPerry/audio-mood-classifier)
+- [Project on GitHub](https://github.com/PerryGu/audio_mood_classifier_hf)
 """
 
 # ── Load model and feature extractor once at startup ─────────────────────────
@@ -276,12 +308,42 @@ model.eval().to("cuda")
 print("Model ready.")
 
 
-demo = gr.Interface(
-    fn=classify_mood,
-    inputs=gr.Audio(type="filepath", label="Upload a song (MP3)"),
-    outputs=gr.Textbox(label="Predicted mood", lines=7),
-    title="🎵 Audio Mood Classifier",
-    description=description,
-)
+# ── UI layout ─────────────────────────────────────────────────────────────────
+# Gradio 5 defaults to input-left / output-right even in Blocks; override with CSS.
+CSS = """
+#main-col { max-width: 720px; margin: 0 auto; }
+#main-col .form {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem;
+}
+#main-col .block { width: 100% !important; }
+"""
+
+with gr.Blocks(title="🎵 Audio Mood Classifier", css=CSS, fill_width=False) as demo:
+    with gr.Column(elem_id="main-col"):
+        gr.Markdown("# 🎵 Audio Mood Classifier")
+        gr.Markdown(description)
+
+        song_name = gr.Textbox(
+            label="Song",
+            value="No song selected",
+            interactive=False,
+            lines=1,
+        )
+        audio_input = gr.Audio(type="filepath", label="Upload a song (MP3)")
+        mood_output = gr.Textbox(label="Predicted mood", lines=7)
+
+        with gr.Row():
+            clear_btn = gr.Button("Clear")
+            submit_btn = gr.Button("Submit", variant="primary")
+
+    audio_input.change(fn=song_display_name, inputs=audio_input, outputs=song_name)
+    submit_btn.click(fn=classify_mood, inputs=audio_input, outputs=mood_output)
+    clear_btn.click(
+        lambda: (None, "No song selected", ""),
+        outputs=[audio_input, song_name, mood_output],
+    )
 
 demo.queue().launch()

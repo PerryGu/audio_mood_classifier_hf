@@ -2,6 +2,20 @@
 
 A fine-tuned [MIT Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593) model for 3-class music mood classification, built end-to-end on a custom MP3 dataset and trained with the Hugging Face `Trainer` API.
 
+**Live demo:** [Audio Mood Classifier on Hugging Face Spaces](https://huggingface.co/spaces/guyPerry/audio-mood-classifier-demo) · **Model:** [guyPerry/audio-mood-classifier](https://huggingface.co/guyPerry/audio-mood-classifier)
+
+---
+
+## Hugging Face Space
+
+A public **Gradio demo** is hosted on Hugging Face Spaces so anyone can try the classifier without installing anything locally:
+
+**→ [guyPerry/audio-mood-classifier-demo](https://huggingface.co/spaces/guyPerry/audio-mood-classifier-demo)**
+
+Upload an MP3 and the app samples three 10-second clips from the track, runs each through the fine-tuned AST model, and combines the scores into a single mood prediction (`calm_melancholic`, `moderate_neutral`, or `energetic_upbeat`). The underlying weights live in the separate model repo: [guyPerry/audio-mood-classifier](https://huggingface.co/guyPerry/audio-mood-classifier).
+
+The Space source lives in `demos/audio_mood_classifier/`. To publish changes after editing the app, run `python demos/upload_space.py` (requires `HF_TOKEN` in `.env`).
+
 ---
 
 ## Overview
