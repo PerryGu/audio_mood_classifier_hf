@@ -33,13 +33,25 @@ Music carries mood, and labeling it automatically is a hard problem. This projec
 The goal was to go from a hand-curated list of songs all the way to a trained and evaluated classifier, without relying on any pre-labeled public dataset. Instead, the dataset was constructed from scratch:
 
 1. A personal music library was scanned against a curated song catalog, and each matched track was sampled at **6 evenly-spaced positions** throughout the song. At every position a **10-second clip** was extracted, skipping the first and last 30 seconds of the track to avoid intros and outros. This gives 6 labeled segments per song, each capturing a different moment in the track — maximizing dataset size and variety while keeping each clip representative of the song's overall mood. Each segment also had EBU R128 loudness normalization applied to keep volume levels consistent across clips.
-2. Those segments were loaded, resampled to 16 kHz, and converted to spectrograms — 2D frequency-over-time representations of the audio — which were then fed into the model.
+2. Those segments were loaded, resampled to 16 kHz, and turned into spectrograms by `ASTFeatureExtractor` from the MIT checkpoint. That tensor is what the model sees. The optional PNG script in `data_generation/` is a separate picture and is not part of this step.
 
 **The model** is a fine-tuned [Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593), developed by MIT and pre-trained on AudioSet. AST applies the standard Vision Transformer architecture directly to audio spectrograms, treating each spectrogram as an "image" and processing it with self-attention across frequency and time. Starting from a model already pre-trained on a large and diverse audio dataset gives a strong foundation — the fine-tuning step only needs to teach it the mood-specific distinctions. The latest run, `mood_classifier_2026-07-16_09-27`, trains the classification head plus the top 3 encoder layers (`num_unfrozen_layers = 3`). Set that value back to `0` to train the head only.
 
 The pipeline handles the full workflow: data generation, feature extraction, group-aware dataset splitting (ensuring all segments from the same song stay in the same split, to prevent leakage between train/test/eval), training with checkpoint resumption, and evaluation with accuracy reported relative to the random baseline.
 
 The project runs in two environments — **locally** (with a GPU or CPU) and in **Google Colab** (free T4 GPU). Checkpoints are saved to Google Drive and can be copied back locally to continue training, keeping both environments in sync via a simple `git push` / `git pull`.
+
+---
+
+## What the model sees
+
+One 10-second clip from each class, plotted from the spectrogram tensors stored for training. Left to right: Air, “All I Need” (`calm_melancholic`); 10cc, “Dreadlock Holiday” (`moderate_neutral`); ABBA, “Gimme! Gimme! Gimme!” (`energetic_upbeat`). Time runs left to right. Mel bins run upward. The color scale is the normalized value the AST extractor wrote, not loudness in decibels.
+
+These pictures are not produced by `data_generation/generate_spectrograms.py`. That script is optional. It writes its own librosa PNGs (22,050 Hz, a 5-second window, decibels scaled to the clip), and training never reads them. The model requires the spectrogram from `ASTFeatureExtractor`: 16 kHz audio, the MIT mel settings, and AudioSet mean/std normalization. The mood is not something you can read off the colors.
+
+<p align="center">
+  <img src="docs/media/ast_input_three_moods.png" alt="AST input spectrograms for one clip from each mood class" width="100%"/>
+</p>
 
 ---
 
@@ -80,7 +92,7 @@ audio_mood_classifier_hf/
 ├── data_generation/                     # Data pipeline scripts (run once to build dataset)
 │   ├── prepare_dataset.py               # Step 1 — match catalog against local music library
 │   ├── generate_songs_sagmens.py        # Step 2 — extract MP3 segments from matched tracks
-│   └── generate_spectrograms.py         # (Optional) Generate Mel-spectrogram PNGs instead
+│   └── generate_spectrograms.py         # Optional librosa PNGs; not used in training
 │
 ├── docs/
 │   ├── songs_catalog.md                 # Hand-curated track list by category
@@ -452,7 +464,7 @@ python data_generation/generate_songs_sagmens.py
 python data_generation/generate_spectrograms.py
 ```
 
-Produces `128-bin dB-scaled Mel-spectrogram PNGs` (400×400 px, magma colormap) alongside the MP3s. Not required for the main training pipeline.
+Writes optional 128-bin dB-scaled Mel-spectrogram PNGs (400×400 px, magma colormap). Training does not use these files. The model builds its own spectrogram with `ASTFeatureExtractor` while the dataset is prepared. See [What the model sees](#what-the-model-sees).
 
 ---
 
