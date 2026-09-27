@@ -144,7 +144,7 @@ def _extract_network_path(line: str) -> Path | None:
     catalog line.  Returns None if no qualifying path token is found.
 
     Qualifying paths:
-      • UNC shares    — start with two backslashes, e.g. ``\\GAMES\\...``
+      • UNC shares    — start with two backslashes, e.g. ``\\server\\share\\...``
       • Drive paths   — second character is ``:``,    e.g. ``C:\\...``
 
     Imposes no constraints on surrounding whitespace, bullet characters,

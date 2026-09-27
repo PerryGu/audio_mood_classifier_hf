@@ -31,7 +31,7 @@ def upload_dataset_to_hub(local_path: str, repo_id: str, commit_msg: str = "Upda
     print(f"[SUCCESS] Upload complete.")
 
 if __name__ == "__main__":
-    local_path=r"F:\Work_stuff\VisualStudio_cursor\audio_mood_classifier\data\mp3_data"
+    local_path=r"path\to\mp3_data"
     repo_id="guyPerry/audio-mood-dataset"
     commit_msg="Uploading dataset first time"
     upload_dataset_to_hub(local_path=local_path, repo_id=repo_id, commit_msg=commit_msg)

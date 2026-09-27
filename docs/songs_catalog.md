@@ -1,4 +1,4 @@
-# calm_melancholic - 85
+# calm_melancholic - 76
 10cc - I’m Not in Love
 Air - How Does It Make You Feel?
 Air - All I Need
@@ -13,8 +13,6 @@ The Alan Parsons Project - Old and Wise
 The Needle and the Damage Done
 Tori Amos - I Don't Like Mondays
 Michael Andrews, Gary Jules - Mad World
-Shlomo Artzi - אף פעם לא תדעי
-Shlomo Artzi - שדות של אירוסים
 Angelo Badalamenti - Twin Peaks, television score: Twin Peaks Theme
 Shirley Bassey - Moonraker [Main Title]
 Jon Brion, Beck - Eternal Sunshine of the Spotless Mind
@@ -41,9 +39,6 @@ Thomas Dolby - I Scare Myself
 Eagles - I Wish You Peace
 Emika - Wicked Game
 Genesis - Many Too Many
-Shalom Hanoch - דז'ה וו.
-Shalom Hanoch - עיר זרה
-Shalom Hanoch - קרן שמש מאוחרת
 George Harrison - Beware of Darkness 
 Kristin Hersh - Your Ghost
 Michael Jackson - Stranger in Moscow
@@ -68,7 +63,6 @@ Pat Metheny Group, Pat Metheny - Chris
 Pat Metheny Group, Pat Metheny - The Falcon
 Pat Metheny Group, Pat Metheny - Capture
 George Michael - They Won't Go When I Go
-Minimal Compact - When I Go
 The Moody Blues - Melancholy Man
 Morrissey - Interlude (solo version)
 Peter Murphy - A Strange Kind of Love (version one)
@@ -82,7 +76,7 @@ Suzanne Vega - Caramel
 Tuxedomoon - In a Manner of Speaking
 Tuxedomoon - The Cage
 
-# moderate_neutral - 83
+# moderate_neutral - 66
 10cc - Dreadlock Holiday 
 a‐ha - I Call Your Name
 America - A Horse With No Name
@@ -90,7 +84,6 @@ America - Ventura Highway
 America - Tin Man
 America - Lonely People
 America - You Can Do Magic
-Shlomo Artzi - מהן המלים
 The Beatles - Your Mother Should Know
 The Beautiful South - Everybody's Talkin'
 Beck -Deadweight
@@ -139,16 +132,13 @@ Grace Jones -  I've Seen That Face Before (Libertango)
 Howard Jones - Hide and Seek
 Julian Lennon - Valotte
 Madonna - What It Feels Like for a Girl
-Mashina - רני בפריז
 Dave Matthews Band - Crush
 Dave Matthews Band - Crash into Me
 Malcolm McLaren - Jazz Is Paris
-Izhar Ashdot, להקה רטורית, Meni Beger - סדר יום
 Julian Lennon - Too Late for Goodbyes
 David McWilliams - Days of Pearly Spencer
 Pat Metheny Group - Last Train Home
 Moby - Porcelain
-Nikmat HaTraktor - משחק של דמעות
 Nouvelle Vague - Love Will Tear Us Apart
 Nouvelle Vague - In a Manner of Speaking
 Robert Palmer - Mercy Mercy Me (The Ecology)
@@ -189,7 +179,6 @@ Genesis - That's All
 Genesis - Invisible Touch
 Genesis - Land of Confusion
 Gipsy Kings - Bamboleo
-Gidi Gov - אני שוב מתאהב
 The Grass Roots - Let's Live For Today
 George Michael - Too Funky
 George Michael - Outside
@@ -207,7 +196,6 @@ Led Zeppelin - Ramble On
 Madonna - Open Your Heart
 Madonna - Material Girl
 Madonna - Holiday
-Mashina - שלג צח
 Paul McCartney, Wings - Coming Up (live at Glasgow)
 Paul McCartney, Wings, Howie Casey - Mrs. Vandebilt
 Metallica - Enter Sandman

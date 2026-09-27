@@ -11,8 +11,8 @@ class TrainingConfig:
     num_labels: int = 3
 
     # --- Training Hyperparameters ---
-    learning_rate: float = 4e-7 #1e-6 #1e-5
-    num_train_epochs: int = 10
+    learning_rate: float = 4e-7
+    num_train_epochs: int = 15
     logging_steps: int = 50
 
     # --- Strategy Configuration ---
@@ -30,9 +30,10 @@ class TrainingConfig:
     # --- Layer Freezing ---
     # Number of encoder layers to unfreeze for training, counting from the top
     # (output end) of the transformer.  The classifier head is always trainable.
-    #   0  → classifier head only         (fastest, ~3 K params)   ← current default
+    #   0  → classifier head only         (fastest, ~3 K params)
     #   1  → layer 11 + layernorm + head  (~7 M params)
     #   2  → layers 10-11 + layernorm + head
+    #   3  → layers 9-11 + layernorm + head   ← latest run (mood_classifier_2026-07-16_09-27)
     #   12 → all encoder layers + head    (full fine-tune, slowest)
     # When resuming from a checkpoint, set this higher and lower the learning_rate.
     num_unfrozen_layers: int = 3

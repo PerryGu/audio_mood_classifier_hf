@@ -24,7 +24,7 @@ import mutagen
 from tqdm import tqdm
 
 # ─── CONFIGURE THIS before running ────────────────────────────────────────────
-MUSIC_LIBRARY_PATH = r"\\GAMES\Utils\iTunes\iTunes Media\Music"   # ← set this
+MUSIC_LIBRARY_PATH = r"C:\path\to\your\music\library"   # ← set this
 # ──────────────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR       = Path(__file__).parent

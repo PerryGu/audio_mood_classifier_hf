@@ -20,14 +20,22 @@ The Space source lives in `demos/audio_mood_classifier/`. To publish changes aft
 
 ## Overview
 
-Music carries mood — but labeling it automatically is a hard problem. This project builds a complete, end-to-end pipeline to do exactly that: given a short audio clip, the model predicts whether the music feels **calm and melancholic**, **moderate and neutral**, or **energetic and upbeat**.
+Sorting songs by mood is a shaky task, and that showed up while this dataset was being built.
+
+Mood is personal. Two people can hear the same track and come away with different feelings. A song that sounds sad or melancholic to one listener can leave another unmoved. It rarely flips all the way to joy, but the reaction still belongs to the listener.
+
+The same person drifts, too. I chose these songs, and a track that felt like one category at one point in my life can feel different years later. That is why the label set stops at three classes — `calm_melancholic`, `moderate_neutral`, and `energetic_upbeat` — instead of a finer scale. Going back through the lists, plenty of songs made me ask what I had been thinking at the time. Some are tied to old memories. They belonged in that category then, and that association is still the label.
+
+The middle class is the hard one, for me and for the model. `moderate_neutral` spills into the other two, which matches how difficult those songs are to place by ear. The aim was to keep a quiet song, or a love song, from landing in `calm_melancholic` only because it is soft. That distinction is real, and it is not a simple one.
+
+Music carries mood, and labeling it automatically is a hard problem. This project builds a complete, end-to-end pipeline to do exactly that: given a short audio clip, the model predicts whether the music feels **calm and melancholic**, **moderate and neutral**, or **energetic and upbeat**.
 
 The goal was to go from a hand-curated list of songs all the way to a trained and evaluated classifier, without relying on any pre-labeled public dataset. Instead, the dataset was constructed from scratch:
 
 1. A personal music library was scanned against a curated song catalog, and each matched track was sampled at **6 evenly-spaced positions** throughout the song. At every position a **10-second clip** was extracted, skipping the first and last 30 seconds of the track to avoid intros and outros. This gives 6 labeled segments per song, each capturing a different moment in the track — maximizing dataset size and variety while keeping each clip representative of the song's overall mood. Each segment also had EBU R128 loudness normalization applied to keep volume levels consistent across clips.
 2. Those segments were loaded, resampled to 16 kHz, and converted to spectrograms — 2D frequency-over-time representations of the audio — which were then fed into the model.
 
-**The model** is a fine-tuned [Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593), developed by MIT and pre-trained on AudioSet. AST applies the standard Vision Transformer architecture directly to audio spectrograms, treating each spectrogram as an "image" and processing it with self-attention across frequency and time. Starting from a model already pre-trained on a large and diverse audio dataset gives a strong foundation — the fine-tuning step only needs to teach it the mood-specific distinctions. By default only the final classification head is re-trained for the 3 mood classes, but `num_unfrozen_layers` in `config.py` lets you progressively unfreeze the top encoder layers for deeper fine-tuning.
+**The model** is a fine-tuned [Audio Spectrogram Transformer (AST)](https://huggingface.co/MIT/ast-finetuned-audioset-10-10-0.4593), developed by MIT and pre-trained on AudioSet. AST applies the standard Vision Transformer architecture directly to audio spectrograms, treating each spectrogram as an "image" and processing it with self-attention across frequency and time. Starting from a model already pre-trained on a large and diverse audio dataset gives a strong foundation — the fine-tuning step only needs to teach it the mood-specific distinctions. The latest run, `mood_classifier_2026-07-16_09-27`, trains the classification head plus the top 3 encoder layers (`num_unfrozen_layers = 3`). Set that value back to `0` to train the head only.
 
 The pipeline handles the full workflow: data generation, feature extraction, group-aware dataset splitting (ensuring all segments from the same song stay in the same split, to prevent leakage between train/test/eval), training with checkpoint resumption, and evaluation with accuracy reported relative to the random baseline.
 
@@ -76,7 +84,7 @@ audio_mood_classifier_hf/
 │
 ├── docs/
 │   ├── songs_catalog.md                 # Hand-curated track list by category
-│   └── catalog_with_paths.md            # Auto-generated: catalog + matched file paths
+│   └── catalog_with_paths.md            # Auto-generated locally; gitignored (library paths)
 │
 ├── models/
 │   ├── ast_pretrained/                  # Base pre-trained AST model files (not committed to git)
@@ -286,9 +294,9 @@ All hyperparameters and run-behaviour flags live in **`src/config.py`** — the 
 
 | Field | Default | Description |
 |---|---|---|
-| `learning_rate` | `1e-5` | AdamW learning rate |
+| `learning_rate` | `4e-7` | AdamW learning rate used in `mood_classifier_2026-07-16_09-27` |
 | `batch_size` | `32` | Per-device training batch size |
-| `num_train_epochs` | `5` | Total training epochs |
+| `num_train_epochs` | `15` | Epochs for that run. It resumed from the previous checkpoint |
 | `logging_steps` | `50` | TensorBoard log frequency |
 | `optim` | `adamw_torch_fused` | Optimizer — auto-switched to `adamw_torch` on CPU |
 | `report_to` | `tensorboard` | `"tensorboard"` \| `"wandb"` \| `"all"` |
@@ -310,9 +318,10 @@ Controlled by `num_unfrozen_layers` in `config.py`. The classifier head is alway
 
 | `num_unfrozen_layers` | Trainable scope | Approx params | Recommended LR |
 |---|---|---|---|
-| `0` | Classifier head only *(default)* | ~3 K | `1e-5` |
+| `0` | Classifier head only | ~3 K | `1e-5` |
 | `1` | Layer 11 + layernorm + head | ~7 M | `2e-6` |
 | `2` | Layers 10–11 + layernorm + head | ~14 M | `1e-6` |
+| `3` | Layers 9–11 + layernorm + head *(latest run)* | ~21 M | `4e-7` |
 | `4` | Layers 8–11 + layernorm + head | ~28 M | `5e-7` |
 | `12` | All encoder layers + head | ~87 M | `1e-7` |
 
@@ -421,9 +430,9 @@ python data_generation/prepare_dataset.py
 
 - Reads `docs/songs_catalog.md` (hand-curated track list).
 - Walks your local music library (`MUSIC_LIBRARY_PATH` in the script).
-- Writes `docs/catalog_with_paths.md` with matched audio file paths and similarity scores.
+- Writes `docs/catalog_with_paths.md` with matched audio file paths and similarity scores. That file stays on your machine and is gitignored.
 
-> Set `MUSIC_LIBRARY_PATH` inside `prepare_dataset.py` before running.
+> Set `MUSIC_LIBRARY_PATH` inside `prepare_dataset.py` before running. The script exits if it is still the placeholder.
 
 ### Step 2 — Extract MP3 segments
 
@@ -506,7 +515,7 @@ Splitting is performed with `GroupShuffleSplit` (scikit-learn), grouping by **so
 
 - **Base model:** `MIT/ast-finetuned-audioset-10-10-0.4593` (Audio Spectrogram Transformer, 12 encoder layers)
 - **Classification head:** re-initialized for `num_labels=3`, always trainable
-- **Frozen layers:** controlled by `num_unfrozen_layers` in `config.py` (default `0` = full backbone frozen, only head trains; set higher to unfreeze top encoder layers for deeper fine-tuning)
+- **Frozen layers:** controlled by `num_unfrozen_layers` in `config.py` (latest run `3` = top 3 encoder layers, final layernorm, and the head; `0` trains the head only)
 - **Input:** 16 kHz mono audio → `ASTFeatureExtractor` → 2D spectrogram (`input_values`)
 - **Model source priority:** `models/ast_pretrained/` (local) → Drive copy (Colab) → HF Hub download (cached to `models/ast_pretrained/` for future runs)
 

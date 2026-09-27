@@ -10,3 +10,6 @@ data_generation/ffmpeg.exe
 runs/
 models/
 wandb/
+
+# Generated locally by prepare_dataset.py. Holds absolute library paths.
+docs/catalog_with_paths.md
