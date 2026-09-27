@@ -14,7 +14,7 @@ A public **Gradio demo** is hosted on Hugging Face Spaces so anyone can try the 
 
 Upload an MP3 and the app samples three 10-second clips from the track, runs each through the fine-tuned AST model, and combines the scores into a single mood prediction (`calm_melancholic`, `moderate_neutral`, or `energetic_upbeat`). The underlying weights live in the separate model repo: [guyPerry/audio-mood-classifier](https://huggingface.co/guyPerry/audio-mood-classifier).
 
-The Space source lives in `demos/audio_mood_classifier/`. To publish changes after editing the app, run `python demos/upload_space.py` (requires `HF_TOKEN` in `.env`).
+The Space source lives in `space/audio_mood_classifier/`. To publish changes after editing the app, run `python space/upload_space.py` (requires `HF_TOKEN` in `.env`).
 
 ---
 
@@ -67,77 +67,72 @@ These pictures are not produced by `data_generation/generate_spectrograms.py`. T
 
 ## Project Structure
 
-```
-audio_mood_classifier_hf/
-├── main.py                              # Entry point — runs the full ML pipeline
-├── requirements.txt
-├── .env                                 # HF_TOKEN (local auth)
-├── audio_mood_classifier_hf.ipynb       # Google Colab notebook (3-cell setup)
-│
-├── demos/                               # Gradio / HF Spaces deployment
-│   ├── upload_model.py                  # Upload trained checkpoint to HF model repo
-│   ├── upload_space.py                  # Upload the Gradio app to HF Spaces
-│   └── audio_mood_classifier/           # The Space itself (uploaded as-is)
-│       ├── app.py                       # Gradio inference app
-│       ├── requirements.txt             # Space dependencies
-│       └── README.md                    # HF Spaces metadata + description
-│
-├── data/
-│   ├── mp3_data/                        # Raw MP3 segments, organized by mood class
-│   │   ├── calm_melancholic/
-│   │   ├── energetic_upbeat/
-│   │   └── moderate_neutral/
-│   └── processed_dataset/               # Cached HF Dataset with extracted input_values
-│
-├── data_generation/                     # Data pipeline scripts (run once to build dataset)
-│   ├── prepare_dataset.py               # Step 1 — match catalog against local music library
-│   ├── generate_songs_sagmens.py        # Step 2 — extract MP3 segments from matched tracks
-│   └── generate_spectrograms.py         # Optional librosa PNGs; not used in training
-│
-├── docs/
-│   ├── songs_catalog.md                 # Hand-curated track list by category
-│   └── catalog_with_paths.md            # Auto-generated locally; gitignored (library paths)
-│
-├── models/
-│   ├── ast_pretrained/                  # Base pre-trained AST model files (not committed to git)
-│   │   ├── config.json
-│   │   ├── preprocessor_config.json
-│   │   └── model.safetensors
-│   └── mood_classifier_<timestamp>/     # Training checkpoints (auto-created per session)
-│       ├── checkpoint-N/
-│       ├── training_info.json
-│       └── test_performance.txt
-│
-├── runs/                                # TensorBoard logs (auto-created per session)
-│   └── continuous/                      # Aggregated multi-session logs for one curve
-│
-└── src/
-    ├── pipeline_manager.py              # Central state manager / pipeline orchestrator
-    ├── config.py                        # TrainingConfig dataclass (all hyperparameters & flags)
-    ├── data_processing/
-    │   ├── data_loader.py               # Load MP3s with librosa, build HF Dataset
-    │   ├── data_processor.py            # Feature extraction & group-shuffle splitting
-    │   ├── dataset.py                   # AudioDataset class
-    │   └── augmentation.py              # SpecAugmentCollator — on-the-fly training augmentation
-    └── utils/
-        ├── load_model.py                # AST model & feature extractor initialization
-        ├── tests.py                     # Integrity checks, leakage detection, debug tools
-        ├── get_model_params.py
-        └── data_uploader.py
-```
+<details>
+<summary>![](docs/media/icons/folder.svg) <strong>audio_mood_classifier_hf/</strong> — click to expand the tree</summary>
+
+- ![](docs/media/icons/file.svg) `LICENSE` — ISC license for this code
+- ![](docs/media/icons/file.svg) `main.py` — entry point; runs the full ML pipeline
+- ![](docs/media/icons/file.svg) `requirements.txt`
+- ![](docs/media/icons/file.svg) `.env` — `HF_TOKEN` (local auth)
+- ![](docs/media/icons/file.svg) `audio_mood_classifier_hf.ipynb` — Google Colab notebook (3-cell setup)
+- ![](docs/media/icons/folder.svg) `space/` — Gradio app and the scripts that publish it to HF Spaces
+  - ![](docs/media/icons/file.svg) `upload_model.py` — upload a trained checkpoint to the HF model repo
+  - ![](docs/media/icons/file.svg) `upload_space.py` — upload the Gradio app to HF Spaces
+  - ![](docs/media/icons/folder.svg) `audio_mood_classifier/` — the Space itself (uploaded as-is)
+    - ![](docs/media/icons/file.svg) `app.py` — Gradio inference app
+    - ![](docs/media/icons/file.svg) `requirements.txt` — Space dependencies
+    - ![](docs/media/icons/file.svg) `README.md` — HF Spaces metadata and description
+- ![](docs/media/icons/folder.svg) `data/`
+  - ![](docs/media/icons/folder.svg) `mp3_data/` — raw MP3 segments, organized by mood class
+    - ![](docs/media/icons/folder.svg) `calm_melancholic/`
+    - ![](docs/media/icons/folder.svg) `energetic_upbeat/`
+    - ![](docs/media/icons/folder.svg) `moderate_neutral/`
+  - ![](docs/media/icons/folder.svg) `processed_dataset/` — cached HF Dataset with extracted `input_values`
+- ![](docs/media/icons/folder.svg) `data_generation/` — data pipeline scripts (run once to build the dataset)
+  - ![](docs/media/icons/file.svg) `prepare_dataset.py` — step 1: match the catalog against a local music library
+  - ![](docs/media/icons/file.svg) `generate_songs_sagmens.py` — step 2: extract MP3 segments from matched tracks
+  - ![](docs/media/icons/file.svg) `generate_spectrograms.py` — optional librosa PNGs; not used in training
+- ![](docs/media/icons/folder.svg) `docs/`
+  - ![](docs/media/icons/file.svg) `songs_catalog.md` — hand-curated track list by category
+  - ![](docs/media/icons/file.svg) `catalog_with_paths.md` — generated locally; gitignored (library paths)
+  - ![](docs/media/icons/folder.svg) `media/`
+- ![](docs/media/icons/folder.svg) `models/`
+  - ![](docs/media/icons/folder.svg) `ast_pretrained/` — base AST files (not committed)
+    - ![](docs/media/icons/file.svg) `config.json`
+    - ![](docs/media/icons/file.svg) `preprocessor_config.json`
+    - ![](docs/media/icons/file.svg) `model.safetensors`
+  - ![](docs/media/icons/folder.svg) `mood_classifier_<timestamp>/` — checkpoints for one session
+    - ![](docs/media/icons/folder.svg) `checkpoint-N/`
+    - ![](docs/media/icons/file.svg) `training_info.json`
+    - ![](docs/media/icons/file.svg) `test_performance.txt`
+- ![](docs/media/icons/folder.svg) `runs/` — TensorBoard logs (auto-created per session)
+  - ![](docs/media/icons/folder.svg) `continuous/` — aggregated multi-session logs for one curve
+- ![](docs/media/icons/folder.svg) `src/`
+  - ![](docs/media/icons/file.svg) `pipeline_manager.py` — central state manager / pipeline orchestrator
+  - ![](docs/media/icons/file.svg) `config.py` — `TrainingConfig` (hyperparameters and flags)
+  - ![](docs/media/icons/folder.svg) `data_processing/`
+    - ![](docs/media/icons/file.svg) `data_loader.py` — load MP3s with librosa, build the HF Dataset
+    - ![](docs/media/icons/file.svg) `data_processor.py` — feature extraction and group-shuffle splitting
+    - ![](docs/media/icons/file.svg) `dataset.py` — `AudioDataset`
+    - ![](docs/media/icons/file.svg) `augmentation.py` — `SpecAugmentCollator`
+  - ![](docs/media/icons/folder.svg) `utils/`
+    - ![](docs/media/icons/file.svg) `load_model.py` — AST model and feature extractor
+    - ![](docs/media/icons/file.svg) `tests.py` — integrity checks, leakage detection, debug tools
+    - ![](docs/media/icons/file.svg) `get_model_params.py`
+    - ![](docs/media/icons/file.svg) `data_uploader.py`
+
+</details>
 
 ### Google Drive folder structure
 
 The Drive folder mirrors the local project structure exactly:
 
-```
-MyDrive/audio_mood_classifier_hf/
-├── models/
-│   ├── ast_pretrained/              # Base AST model files (upload once, reused every session)
-│   └── mood_classifier_<timestamp>/ # Auto-backed-up after each training run
-├── runs/                            # Auto-backed-up TensorBoard logs
-└── mp3_data.zip                     # Zipped MP3 dataset (extracted once on first run)
-```
+- ![](docs/media/icons/folder.svg) `MyDrive/audio_mood_classifier_hf/`
+  - ![](docs/media/icons/folder.svg) `models/`
+    - ![](docs/media/icons/folder.svg) `ast_pretrained/` — base AST files (upload once, reused every session)
+    - ![](docs/media/icons/folder.svg) `mood_classifier_<timestamp>/` — backed up after each training run
+  - ![](docs/media/icons/folder.svg) `runs/` — backed-up TensorBoard logs
+  - ![](docs/media/icons/file.svg) `mp3_data.zip` — zipped MP3 dataset (extracted once on first run)
 
 > The Colab notebook (`audio_mood_classifier_hf.ipynb`) clones the repo from GitHub, mounts Drive, and extracts the MP3 data automatically — you never need to manually copy code files to Drive.
 

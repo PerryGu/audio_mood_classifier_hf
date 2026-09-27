@@ -2,7 +2,7 @@
 upload_space.py — Upload the audio_mood_classifier demo to Hugging Face Spaces.
 
 Run once from the project root:
-    python demos/upload_space.py
+    python space/upload_space.py
 
 Requires:
     - huggingface_hub  (pip install huggingface_hub)
@@ -15,8 +15,8 @@ from dotenv import load_dotenv
 from huggingface_hub import HfApi, create_repo, get_full_repo_name, upload_folder
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-# Path to the demo folder to upload (relative to project root).
-LOCAL_DEMO_FOLDER = "./demos/audio_mood_classifier"
+# Path to the Space folder to upload (relative to project root).
+LOCAL_DEMO_FOLDER = "./space/audio_mood_classifier"
 
 # Name of the Space on Hugging Face (will become <your-username>/<HF_SPACE_NAME>).
 HF_SPACE_NAME = "audio-mood-classifier-demo"  # Gradio + ZeroGPU space

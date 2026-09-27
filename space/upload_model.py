@@ -2,10 +2,10 @@
 upload_model.py — Upload a trained checkpoint to a Hugging Face model repository.
 
 Run from the project root:
-    python demos/upload_model.py
+    python space/upload_model.py
 
 Works both locally and in Google Colab (reads HF_TOKEN from environment or .env).
-After uploading, set MODEL_ID in demos/audio_mood_classifier/app.py to point to
+After uploading, set MODEL_ID in space/audio_mood_classifier/app.py to point to
 the new repo so the Gradio Space can load it.
 """
 
@@ -71,6 +71,6 @@ commit_url = upload_folder(
 print(f"\n[INFO] Upload complete!")
 print(f"[INFO] View it at: https://huggingface.co/{full_repo_name}")
 print()
-print(f"Next step: update MODEL_ID in demos/audio_mood_classifier/app.py:")
+print(f"Next step: update MODEL_ID in space/audio_mood_classifier/app.py:")
 print(f'  MODEL_ID = "{full_repo_name}"')
-print(f"Then run: python demos/upload_space.py")
+print(f"Then run: python space/upload_space.py")
